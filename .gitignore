@@ -1,0 +1,10 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Model weights / binaries
+*.pth
+
+# Dataset files and directories
+Handwriting/NewHandPD/
