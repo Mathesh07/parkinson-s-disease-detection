@@ -1,0 +1,30 @@
+{
+    "model_architecture": "GaitCNNBiLSTM (1D CNN + BiLSTM)",
+    "sampling_rate": 100,
+    "window_duration_sec": 5.0,
+    "window_size": 500,
+    "overlap_ratio": 0.5,
+    "num_channels": 16,
+    "cnn_channels": [
+        64,
+        128
+    ],
+    "lstm_hidden_size": 128,
+    "lstm_num_layers": 2,
+    "embedding_dim": 128,
+    "best_epoch": 5,
+    "val_subject_accuracy": 0.76,
+    "val_subject_precision": 0.7222222222222222,
+    "val_subject_recall": 0.9285714285714286,
+    "val_subject_specificity": 0.5454545454545454,
+    "val_subject_f1": 0.8125,
+    "val_subject_roc_auc": 0.6493506493506493,
+    "label_map": {
+        "Co": 0,
+        "Pt": 1
+    },
+    "id2label": {
+        "0": "Healthy Control (HC)",
+        "1": "Parkinson's Disease (PD)"
+    }
+}

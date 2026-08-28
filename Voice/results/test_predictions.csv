@@ -1,0 +1,13 @@
+recording_id,subject_id,task,true_label,pd_probability,predicted_label,predicted_name,hc_probability
+ID04_pd_2_0_1.wav,ID04,ReadText,1,0.8175168389861938,1,Parkinson's Disease (PD),0.18248316101380624
+ID04_pd_2_0_1.wav,ID04,SpontaneousDialogue,1,0.5395754314591422,1,Parkinson's Disease (PD),0.4604245685408578
+ID10_hc_0_0_0.wav,ID10,ReadText,0,0.8438462215640089,1,Parkinson's Disease (PD),0.1561537784359911
+ID10_hc_0_0_0.wav,ID10,SpontaneousDialogue,0,0.2898236557264768,0,Healthy Control (HC),0.7101763442735232
+ID13_pd_3_2_2.wav,ID13,ReadText,1,0.10413710146288697,0,Healthy Control (HC),0.895862898537113
+ID13_pd_3_2_2.wav,ID13,SpontaneousDialogue,1,0.23205043816938997,0,Healthy Control (HC),0.76794956183061
+ID23_hc_0_0_0.wav,ID23,ReadText,0,0.0824241362995683,0,Healthy Control (HC),0.9175758637004316
+ID23_hc_0_0_0.wav,ID23,SpontaneousDialogue,0,0.18136083188518468,0,Healthy Control (HC),0.8186391681148153
+ID29_pd_3_1_2.wav,ID29,ReadText,1,0.8800910133868456,1,Parkinson's Disease (PD),0.11990898661315441
+ID29_pd_3_1_2.wav,ID29,SpontaneousDialogue,1,0.6840908773657348,1,Parkinson's Disease (PD),0.3159091226342652
+ID35_hc_0_0_0.wav,ID35,ReadText,0,0.42655433017838124,0,Healthy Control (HC),0.5734456698216188
+ID35_hc_0_0_0.wav,ID35,SpontaneousDialogue,0,0.2923768502169926,0,Healthy Control (HC),0.7076231497830074

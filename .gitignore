@@ -3,8 +3,35 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-# Model weights / binaries
-*.pth
+# Environments
+.venv/
+venv/
+env/
+ENV/
 
-# Dataset files and directories
+# Model weights / large binaries
+*.pth
+*.pt
+*.bin
+*.safetensors
+*.ckpt
+*.onnx
+*.h5
+
+# Keep lightweight feature embeddings
+!*embeddings.pt
+!*embeddings.npy
+
+# Datasets
 Handwriting/NewHandPD/
+Voice/26-29_09_2017_KCL/
+Gait/gait-in-parkinsons-disease-1.0.0/
+*.wav
+*.mp3
+
+# IDE & OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+

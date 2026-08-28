@@ -1,0 +1,85 @@
+{
+    "subject_level": {
+        "accuracy": 0.72,
+        "precision": 0.7333333333333333,
+        "recall_sensitivity": 0.7857142857142857,
+        "specificity": 0.6363636363636364,
+        "f1_score": 0.7586206896551724,
+        "roc_auc": 0.7532467532467533,
+        "tp": 11,
+        "tn": 7,
+        "fp": 4,
+        "fn": 3
+    },
+    "recording_level": {
+        "accuracy": 0.7,
+        "precision": 0.76,
+        "recall_sensitivity": 0.76,
+        "specificity": 0.6,
+        "f1_score": 0.76,
+        "roc_auc": 0.7173333333333334,
+        "tp": 19,
+        "tn": 9,
+        "fp": 6,
+        "fn": 6
+    },
+    "window_level": {
+        "accuracy": 0.6994652406417112,
+        "precision": 0.7756521739130435,
+        "recall_sensitivity": 0.745819397993311,
+        "specificity": 0.6172106824925816,
+        "f1_score": 0.7604433077578857,
+        "roc_auc": 0.7484201790339708,
+        "tp": 892,
+        "tn": 416,
+        "fp": 258,
+        "fn": 304
+    },
+    "study_breakdown": {
+        "Ga": {
+            "accuracy": 0.625,
+            "precision": 0.6666666666666666,
+            "recall_sensitivity": 0.8,
+            "specificity": 0.3333333333333333,
+            "f1_score": 0.7272727272727273,
+            "roc_auc": 0.6666666666666667,
+            "tp": 4,
+            "tn": 1,
+            "fp": 2,
+            "fn": 1
+        },
+        "Ju": {
+            "accuracy": 0.8333333333333334,
+            "precision": 0.75,
+            "recall_sensitivity": 1.0,
+            "specificity": 0.6666666666666666,
+            "f1_score": 0.8571428571428571,
+            "roc_auc": 0.6666666666666667,
+            "tp": 3,
+            "tn": 2,
+            "fp": 1,
+            "fn": 0
+        },
+        "Si": {
+            "accuracy": 0.7272727272727273,
+            "precision": 0.8,
+            "recall_sensitivity": 0.6666666666666666,
+            "specificity": 0.8,
+            "f1_score": 0.7272727272727273,
+            "roc_auc": 0.9,
+            "tp": 4,
+            "tn": 4,
+            "fp": 1,
+            "fn": 2
+        }
+    },
+    "split_counts": {
+        "train_subjects": 115,
+        "val_subjects": 25,
+        "test_subjects": 25,
+        "train_recordings": 226,
+        "val_recordings": 40,
+        "test_recordings": 40,
+        "test_windows": 1870
+    }
+}

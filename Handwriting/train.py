@@ -27,7 +27,7 @@ from config import (BATCH_SIZE, CNN_CHECKPOINT, IMAGE_SIZE,
                     VIT_CHECKPOINT, WEIGHT_DECAY)
 from dataset import (build_manifest, create_dataloaders,
                      create_patient_level_split, print_dataset_summary)
-from evaluate import compute_metrics
+from evaluate import compute_metrics, plot_training_curves
 from model import CNNBaseline, ViTBinaryClassifier
 
 
@@ -227,6 +227,11 @@ def train_model(
     with open(history_file, "w") as f:
         json.dump(history, f, indent=2)
     print(f"Saved training history to {history_file.name}")
+
+    try:
+        plot_training_curves()
+    except Exception as e:
+        print(f"Warning: Could not plot training curves: {e}")
 
     return history
 
