@@ -21,8 +21,36 @@ except ImportError:
     import config
 
 
+class EvidentialHead(nn.Module):
+    """
+    Evidential classification head for subjective logic / evidential neural networks.
+    
+    Transforms feature embeddings into non-negative evidence values:
+        features (B, feature_dim) -> Dropout -> Linear (B, 2) -> Softplus -> Evidence (B, 2)
+        
+    Outputs:
+        evidence: Non-negative tensor of shape (B, 2) representing [e_HC, e_PD] >= 0.
+    """
+
+    def __init__(self, in_features: int, num_classes: int = 2, dropout: float = 0.1):
+        super().__init__()
+        self.in_features = in_features
+        self.num_classes = num_classes
+        self.dropout = nn.Dropout(dropout)
+        self.evidence_layer = nn.Linear(in_features, num_classes)
+        self.softplus = nn.Softplus()
+
+    def forward(self, x: torch.Tensor, return_raw_logits: bool = False) -> Union[torch.Tensor, Tuple[torch.Tensor, torch.Tensor]]:
+        dropped = self.dropout(x)
+        raw_logits = self.evidence_layer(dropped)
+        evidence = self.softplus(raw_logits)
+        if return_raw_logits:
+            return evidence, raw_logits
+        return evidence
+
+
 class Wav2Vec2ForParkinsons(nn.Module):
-    """Pretrained Wav2Vec2 model with temporal pooling and classification head."""
+    """Pretrained Wav2Vec2 model with temporal pooling and evidential classification head."""
 
     def __init__(
         self,
@@ -43,9 +71,12 @@ class Wav2Vec2ForParkinsons(nn.Module):
 
         hidden_size = self.wav2vec2.config.hidden_size  # 768 for wav2vec2-base
 
-        # Classification head
-        self.dropout = nn.Dropout(dropout)
-        self.classifier = nn.Linear(hidden_size, num_classes)
+        # Evidential Output Head (Produces non-negative evidence [e_HC, e_PD] >= 0)
+        self.evidential_head = EvidentialHead(
+            in_features=hidden_size,
+            num_classes=num_classes,
+            dropout=dropout
+        )
 
         if freeze_feature_encoder:
             self.freeze_feature_encoder()
@@ -67,7 +98,7 @@ class Wav2Vec2ForParkinsons(nn.Module):
     ) -> Union[torch.Tensor, Tuple[torch.Tensor, torch.Tensor]]:
         """
         Forward pass through Wav2Vec2 feature & transformer encoders,
-        followed by masked temporal pooling and classification head.
+        followed by masked temporal pooling and evidential head.
         """
         outputs = self.wav2vec2(
             input_values=input_values,
@@ -79,31 +110,29 @@ class Wav2Vec2ForParkinsons(nn.Module):
 
         # Masked temporal mean pooling
         if attention_mask is not None:
-            # Map input attention mask (raw waveform) to feature frame dimension
-            # Wav2Vec2 downsamples raw audio ~320x (e.g. 160,000 -> 499 frames)
-            batch_size, seq_len, hidden_dim = hidden_states.shape
-            # Approximate frame mask by interpolating or simple mean across frames
-            # When chunks are fixed length (e.g. 10s), mean across dim=1 is exact
             pooled_embedding = torch.mean(hidden_states, dim=1)
         else:
             pooled_embedding = torch.mean(hidden_states, dim=1)
 
-        # Classification Head
-        dropped = self.dropout(pooled_embedding)
-        logits = self.classifier(dropped)
+        # Evidential Head
+        evidence = self.evidential_head(pooled_embedding)
 
         if return_embedding:
-            return logits, pooled_embedding
-        return logits
+            return evidence, pooled_embedding
+        return evidence
 
 
 if __name__ == "__main__":
-    print("Testing Wav2Vec2ForParkinsons model...")
+    print("Testing Wav2Vec2 evidential model...")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = Wav2Vec2ForParkinsons().to(device)
     dummy_input = torch.randn(2, 160000, device=device)
     with torch.no_grad():
-        logits, emb = model(dummy_input, return_embedding=True)
-        print(f"Logits shape: {logits.shape} (Expected: [2, 2])")
-        print(f"Embedding shape: {emb.shape} (Expected: [2, 768])")
-    print("Model test PASSED!")
+        evidence, emb = model(dummy_input, return_embedding=True)
+        print(f"Evidence shape:       {evidence.shape} (Expected: [2, 2])")
+        print(f"Embedding shape:      {emb.shape} (Expected: [2, 768])")
+        print(f"Min Evidence Value:   {evidence.min().item():.6f} (Must be >= 0)")
+        print(f"Sample Evidence (0):  [e_HC={evidence[0,0].item():.4f}, e_PD={evidence[0,1].item():.4f}]")
+        assert evidence.shape == (2, 2), "Evidence shape mismatch!"
+        assert (evidence >= 0).all(), "All evidence values must be non-negative!"
+    print("Voice evidential architecture verified successfully!")

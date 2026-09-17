@@ -80,7 +80,7 @@ def summarize_dataset(manifest: pd.DataFrame) -> Dict[str, object]:
 
 
 def print_dataset_summary(summary: Dict[str, object], manifest: pd.DataFrame) -> None:
-    """Print a beginner-friendly dataset summary."""
+    """Print a y dataset summary."""
     print("\n=== Dataset Inspection Summary ===")
     print(f"Unique patients: {summary['unique_patients']}")
     print(f"Total images in CSVs: {summary['total_images']}")
@@ -96,7 +96,7 @@ def print_dataset_summary(summary: Dict[str, object], manifest: pd.DataFrame) ->
         print("Missing image references (skipped automatically):")
         print(missing_rows.to_string(index=False))
 
-
+    
 def create_patient_level_split(manifest: pd.DataFrame, test_fold: int = 0, val_fold: int = 1) -> pd.DataFrame:
     """Split the dataset by PATIENT ID so no patient appears in more than one split."""
     # Work at patient level to ensure zero patient leakage

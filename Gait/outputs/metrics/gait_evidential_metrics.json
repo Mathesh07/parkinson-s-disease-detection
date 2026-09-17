@@ -1,0 +1,22 @@
+{
+    "modality": "Gait",
+    "subject_metrics": {
+        "accuracy": 0.68,
+        "precision": 0.8,
+        "recall_sensitivity": 0.5714285714285714,
+        "specificity": 0.8181818181818182,
+        "f1_score": 0.6666666666666666,
+        "roc_auc": 0.7532467532467533,
+        "tp": 8,
+        "tn": 9,
+        "fp": 2,
+        "fn": 6
+    },
+    "uncertainty_stats": {
+        "mean_uncertainty_all": 0.05226509903936155,
+        "mean_uncertainty_correct": 0.04909773671223867,
+        "mean_uncertainty_incorrect": 0.05899574398449768,
+        "mean_uncertainty_HC": 0.05210250715310385,
+        "mean_uncertainty_PD": 0.05239284980713547
+    }
+}

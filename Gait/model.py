@@ -20,9 +20,48 @@ except ImportError:
     import config
 
 
+class EvidentialHead(nn.Module):
+    """
+    Evidential classification head for subjective logic / evidential neural networks.
+    
+    Transforms feature embeddings into non-negative evidence values for each class:
+        features (B, feature_dim) -> Dropout -> Linear (B, num_classes) -> Softplus -> Evidence (B, num_classes)
+        
+    Outputs:
+        evidence: Non-negative tensor of shape (B, 2) representing [e_HC, e_PD] >= 0.
+    """
+
+    def __init__(self, in_features: int, num_classes: int = 2, dropout: float = 0.2):
+        super().__init__()
+        self.in_features = in_features
+        self.num_classes = num_classes
+        self.dropout = nn.Dropout(dropout)
+        self.evidence_layer = nn.Linear(in_features, num_classes)
+        self.softplus = nn.Softplus()
+
+    def forward(self, x: torch.Tensor, return_raw_logits: bool = False) -> Union[torch.Tensor, Tuple[torch.Tensor, torch.Tensor]]:
+        """
+        Forward pass producing non-negative evidence.
+        
+        Args:
+            x: Feature embedding of shape (batch_size, in_features)
+            return_raw_logits: If True, returns (evidence, raw_logits)
+            
+        Returns:
+            evidence: Non-negative evidence of shape (batch_size, 2) where evidence >= 0.
+        """
+        dropped = self.dropout(x)
+        raw_logits = self.evidence_layer(dropped)
+        evidence = self.softplus(raw_logits)
+        
+        if return_raw_logits:
+            return evidence, raw_logits
+        return evidence
+
+
 class GaitCNNBiLSTM(nn.Module):
     """
-    1D CNN + Bidirectional LSTM model for continuous Vertical Ground Reaction Force (VGRF) time-series.
+    1D CNN + Bidirectional LSTM model with Evidential Output Head for continuous VGRF time-series.
     
     Pipeline:
         Raw VGRF (B, 500, 16)
@@ -41,7 +80,7 @@ class GaitCNNBiLSTM(nn.Module):
                ↓
         Dense Embedding Layer (256 -> 128, BN, ReLU, Dropout) -> 128-dim gait_feature_vector
                ↓
-        Classification Head (Dropout, Linear 128 -> 1) -> binary logit
+        Evidential Head (Dropout, Linear 128 -> 2, Softplus) -> [e_HC, e_PD] >= 0
     """
 
     def __init__(
@@ -52,11 +91,13 @@ class GaitCNNBiLSTM(nn.Module):
         lstm_hidden_size: int = config.LSTM_HIDDEN_SIZE,
         lstm_num_layers: int = config.LSTM_NUM_LAYERS,
         embedding_dim: int = config.EMBEDDING_DIM,
+        num_classes: int = 2,
         dropout: float = config.DROPOUT
     ):
         super().__init__()
         self.in_channels = in_channels
         self.embedding_dim = embedding_dim
+        self.num_classes = num_classes
 
         # 1. 1D CNN Feature Extractor (Local temporal dynamics across 16 sensors)
         c1, c2 = cnn_channels
@@ -94,10 +135,11 @@ class GaitCNNBiLSTM(nn.Module):
             nn.Dropout(dropout)
         )
 
-        # 4. Classification Head (BCEWithLogitsLoss)
-        self.classifier = nn.Sequential(
-            nn.Dropout(dropout),
-            nn.Linear(embedding_dim, 1)
+        # 4. Modular Evidential Head (Produces non-negative evidence [e_HC, e_PD] >= 0)
+        self.evidential_head = EvidentialHead(
+            in_features=embedding_dim,
+            num_classes=num_classes,
+            dropout=dropout
         )
 
     def forward(
@@ -106,15 +148,15 @@ class GaitCNNBiLSTM(nn.Module):
         return_embedding: bool = False
     ) -> Union[torch.Tensor, Tuple[torch.Tensor, torch.Tensor]]:
         """
-        Forward pass.
+        Forward pass producing evidential outputs.
         
         Args:
             x: Input tensor of shape (batch_size, time_steps, 16)
-            return_embedding: If True, returns (logits, gait_feature_vector)
+            return_embedding: If True, returns (evidence, gait_feature_vector)
             
         Returns:
-            logits: (batch_size,) if return_embedding=False
-            (logits, embedding): if return_embedding=True
+            evidence: Non-negative tensor of shape (batch_size, 2) -> [e_HC, e_PD]
+            (evidence, embedding): if return_embedding=True
         """
         # 1. Transpose for Conv1d: (B, T, C) -> (B, C, T)
         x_conv = x.transpose(1, 2)
@@ -135,12 +177,12 @@ class GaitCNNBiLSTM(nn.Module):
         # 6. 128-dimensional Gait Feature Vector
         gait_feature_vector = self.embedding_layer(pooled)  # (B, 128)
 
-        # 7. Classification Head Logit
-        logits = self.classifier(gait_feature_vector).squeeze(-1)  # (B,)
+        # 7. Evidential Output Head
+        evidence = self.evidential_head(gait_feature_vector)  # (B, 2)
 
         if return_embedding:
-            return logits, gait_feature_vector
-        return logits
+            return evidence, gait_feature_vector
+        return evidence
 
     def extract_features(self, x: torch.Tensor) -> torch.Tensor:
         """Convenience method to extract only the 128-dimensional embedding."""
@@ -150,11 +192,16 @@ class GaitCNNBiLSTM(nn.Module):
 
 
 if __name__ == "__main__":
-    print("Testing GaitCNNBiLSTM architecture...")
+    print("Testing GaitCNNBiLSTM evidential architecture...")
     model = GaitCNNBiLSTM()
     dummy_input = torch.randn(8, config.WINDOW_SIZE, config.NUM_CHANNELS)
-    logits, emb = model(dummy_input, return_embedding=True)
-    print(f"Input Shape:      {dummy_input.shape} (Expected: [8, 500, 16])")
-    print(f"Logits Shape:     {logits.shape} (Expected: [8])")
-    print(f"Embedding Shape:  {emb.shape} (Expected: [8, 128])")
-    print("GaitCNNBiLSTM Architecture verified successfully!")
+    evidence, emb = model(dummy_input, return_embedding=True)
+    print(f"Input Shape:          {dummy_input.shape} (Expected: [8, 500, 16])")
+    print(f"Evidence Shape:       {evidence.shape} (Expected: [8, 2])")
+    print(f"Embedding Shape:      {emb.shape} (Expected: [8, 128])")
+    print(f"Min Evidence Value:   {evidence.min().item():.6f} (Must be >= 0)")
+    print(f"Max Evidence Value:   {evidence.max().item():.6f}")
+    print(f"Sample Evidence (0):  [e_HC={evidence[0,0].item():.4f}, e_PD={evidence[0,1].item():.4f}]")
+    assert evidence.shape == (8, 2), "Evidence shape mismatch!"
+    assert (evidence >= 0).all(), "All evidence values must be non-negative!"
+    print("Gait evidential architecture verified successfully!")

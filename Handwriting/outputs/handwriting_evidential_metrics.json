@@ -1,0 +1,22 @@
+{
+    "modality": "Handwriting (ViT)",
+    "metrics": {
+        "accuracy": 0.8571428571428571,
+        "precision": 0.75,
+        "recall_sensitivity": 1.0,
+        "specificity": 0.75,
+        "f1_score": 0.8571428571428571,
+        "roc_auc": 0.9609375,
+        "tp": 24,
+        "tn": 24,
+        "fp": 8,
+        "fn": 0
+    },
+    "uncertainty_stats": {
+        "mean_uncertainty_all": 0.41897587212068693,
+        "mean_uncertainty_correct": 0.40019732403258484,
+        "mean_uncertainty_incorrect": 0.5316471606492996,
+        "mean_uncertainty_HC": 0.35958427656441927,
+        "mean_uncertainty_PD": 0.4981646661957105
+    }
+}
