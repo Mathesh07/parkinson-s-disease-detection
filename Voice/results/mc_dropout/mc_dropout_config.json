@@ -1,0 +1,8 @@
+{
+    "seed": 42,
+    "num_passes": 30,
+    "dropout_probability": 0.1,
+    "model_checkpoint": "best_wav2vec2_model",
+    "dataset": "MDVR-KCL",
+    "aggregation_level": "subject"
+}

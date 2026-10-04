@@ -1,0 +1,8 @@
+{
+    "temperature": 0.01000634294591836,
+    "fitted_on": "validation",
+    "evaluation_on": "test",
+    "num_validation_subjects": 5,
+    "num_test_subjects": 6,
+    "seed": 42
+}

@@ -42,41 +42,54 @@ def build_metadata(data_dir: Path = config.DATA_DIR) -> pd.DataFrame:
     tasks = ["ReadText", "SpontaneousDialogue"]
     labels = ["HC", "PD"]
 
-    for task in tasks:
-        for label_name in labels:
-            folder = data_dir / task / label_name
-            if not folder.exists():
-                continue
+    if data_dir.exists():
+        for task in tasks:
+            for label_name in labels:
+                folder = data_dir / task / label_name
+                if not folder.exists():
+                    continue
 
-            for wav_file in sorted(folder.glob("*.wav")):
-                sub_id = extract_subject_id(wav_file.name)
-                
-                try:
-                    with wave.open(str(wav_file), "rb") as wf:
-                        channels = wf.getnchannels()
-                        framerate = wf.getframerate()
-                        nframes = wf.getnframes()
-                        duration = nframes / float(framerate) if framerate > 0 else 0.0
-                except Exception:
-                    sr, data = wavfile.read(str(wav_file))
-                    channels = 1 if data.ndim == 1 else data.shape[1]
-                    framerate = sr
-                    duration = len(data) / float(sr)
+                for wav_file in sorted(folder.glob("*.wav")):
+                    sub_id = extract_subject_id(wav_file.name)
+                    
+                    try:
+                        with wave.open(str(wav_file), "rb") as wf:
+                            channels = wf.getnchannels()
+                            framerate = wf.getframerate()
+                            nframes = wf.getnframes()
+                            duration = nframes / float(framerate) if framerate > 0 else 0.0
+                    except Exception:
+                        sr, data = wavfile.read(str(wav_file))
+                        channels = 1 if data.ndim == 1 else data.shape[1]
+                        framerate = sr
+                        duration = len(data) / float(sr)
 
-                records.append({
-                    "filepath": str(wav_file.resolve()),
-                    "filename": wav_file.name,
-                    "label": config.LABEL_MAP[label_name],
-                    "label_name": label_name,
-                    "task": task,
-                    "subject_id": sub_id,
-                    "duration": duration,
-                    "sample_rate": framerate,
-                    "channels": channels
-                })
+                    records.append({
+                        "filepath": str(wav_file.resolve()),
+                        "filename": wav_file.name,
+                        "label": config.LABEL_MAP[label_name],
+                        "label_name": label_name,
+                        "task": task,
+                        "subject_id": sub_id,
+                        "duration": duration,
+                        "sample_rate": framerate,
+                        "channels": channels
+                    })
+
+    if not records:
+        # Fallback to pre-extracted embeddings metadata if raw audio folder is missing
+        meta_csv = config.RESULTS_DIR / "embeddings" / "voice_embeddings_metadata.csv"
+        if meta_csv.exists():
+            meta_df = pd.read_csv(meta_csv)
+            if "filepath" not in meta_df.columns:
+                meta_df["filepath"] = ""
+            if "filename" not in meta_df.columns and "recording_id" in meta_df.columns:
+                meta_df["filename"] = meta_df["recording_id"]
+            return meta_df
 
     df = pd.DataFrame(records)
     return df
+
 
 
 def create_subject_splits(
@@ -139,15 +152,15 @@ def load_and_resample_audio(filepath: str, target_sr: int = config.SAMPLE_RATE) 
     """Load WAV audio, convert to mono float32, and polyphase resample to target_sr."""
     sr, audio = wavfile.read(filepath)
 
-    if audio.ndim > 1:
-        audio = np.mean(audio, axis=1)
-
     if audio.dtype == np.int16:
         audio = audio.astype(np.float32) / 32768.0
     elif audio.dtype == np.int32:
         audio = audio.astype(np.float32) / 2147483648.0
     else:
         audio = audio.astype(np.float32)
+
+    if audio.ndim > 1:
+        audio = np.mean(audio, axis=1)
 
     # Polyphase resampling (fast & high fidelity)
     if sr != target_sr:
@@ -212,21 +225,55 @@ class VoiceChunkDataset(Dataset):
         self._build_chunk_index()
 
     def _build_chunk_index(self):
+        embeddings_dict = None
+        embs_file = config.RESULTS_DIR / "embeddings" / "voice_embeddings.pt"
+        if embs_file.exists():
+            try:
+                embeddings_dict = torch.load(embs_file, weights_only=True)
+            except Exception:
+                embeddings_dict = torch.load(embs_file)
+
         for rec_idx, row in self.metadata_df.iterrows():
-            audio = load_and_resample_audio(row["filepath"], self.target_sr)
-            chunks = chunk_audio(audio, self.chunk_samples, self.step_samples)
-            num_chunks = len(chunks)
-            for chunk_idx, chunk_data in enumerate(chunks):
+            filepath = row.get("filepath", "")
+            if filepath and Path(filepath).exists():
+                audio = load_and_resample_audio(filepath, self.target_sr)
+                chunks = chunk_audio(audio, self.chunk_samples, self.step_samples)
+                num_chunks = len(chunks)
+                for chunk_idx, chunk_data in enumerate(chunks):
+                    self.chunk_items.append({
+                        "audio_chunk": chunk_data,
+                        "label": row["label"],
+                        "label_name": row["label_name"],
+                        "task": row["task"],
+                        "subject_id": row["subject_id"],
+                        "recording_id": row["filename"],
+                        "filepath": filepath,
+                        "chunk_idx": chunk_idx,
+                        "num_chunks": num_chunks
+                    })
+            elif embeddings_dict is not None:
+                rec_key = row.get("recording_key", f"{row['task']}_{row['filename']}")
+                rec_embs = embeddings_dict.get("recording_embeddings", {})
+                if rec_key in rec_embs:
+                    emb = rec_embs[rec_key]
+                    if isinstance(emb, torch.Tensor):
+                        emb = emb.numpy()
+                else:
+                    sub_embs = embeddings_dict.get("subject_embeddings", {})
+                    emb = sub_embs[row["subject_id"]]
+                    if isinstance(emb, torch.Tensor):
+                        emb = emb.numpy()
+
                 self.chunk_items.append({
-                    "audio_chunk": chunk_data,
+                    "audio_chunk": emb,
                     "label": row["label"],
                     "label_name": row["label_name"],
                     "task": row["task"],
                     "subject_id": row["subject_id"],
-                    "recording_id": row["filename"],
-                    "filepath": row["filepath"],
-                    "chunk_idx": chunk_idx,
-                    "num_chunks": num_chunks
+                    "recording_id": row.get("recording_id", row.get("filename", "")),
+                    "filepath": "",
+                    "chunk_idx": 0,
+                    "num_chunks": 1
                 })
 
     def __len__(self) -> int:

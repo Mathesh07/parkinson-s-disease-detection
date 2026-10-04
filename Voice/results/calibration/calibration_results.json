@@ -1,0 +1,24 @@
+{
+    "experiment": "Voice Wav2Vec2 Post-Hoc Temperature Scaling",
+    "modality": "Voice",
+    "seed": 42,
+    "temperature": 0.01000634294591836,
+    "num_validation_subjects": 5,
+    "num_test_subjects": 6,
+    "uncalibrated_metrics_t1": {
+        "accuracy": 0.6666666666666666,
+        "balanced_accuracy": 0.6666666666666666,
+        "roc_auc": 0.7777777777777778,
+        "nll": 0.6400581525912142,
+        "brier": 0.21846631744186526,
+        "ece": 0.3609461990559094
+    },
+    "calibrated_metrics_t_learned": {
+        "accuracy": 0.6666666666666666,
+        "balanced_accuracy": 0.6666666666666666,
+        "roc_auc": 0.7777777777777778,
+        "nll": 9.084818862745248,
+        "brier": 0.33333333333262544,
+        "ece": 0.33333333333297943
+    }
+}

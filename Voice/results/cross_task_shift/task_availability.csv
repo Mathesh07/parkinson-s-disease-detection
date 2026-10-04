@@ -1,0 +1,7 @@
+subject_id,diagnosis,ReadText_recordings,SpontaneousDialogue_recordings,has_both_tasks
+ID04,PD,1,1,True
+ID10,HC,1,1,True
+ID13,PD,1,1,True
+ID23,HC,1,1,True
+ID29,PD,1,1,True
+ID35,HC,1,1,True

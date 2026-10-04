@@ -1,0 +1,18 @@
+{
+    "model_name": "facebook/wav2vec2-base",
+    "sample_rate": 16000,
+    "chunk_seconds": 10,
+    "overlap_seconds": 2,
+    "best_epoch": 15,
+    "val_subject_f1": 1.0,
+    "val_subject_accuracy": 1.0,
+    "val_subject_roc_auc": 1.0,
+    "label_map": {
+        "HC": 0,
+        "PD": 1
+    },
+    "id2label": {
+        "0": "Healthy Control (HC)",
+        "1": "Parkinson's Disease (PD)"
+    }
+}

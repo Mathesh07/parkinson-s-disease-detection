@@ -1,0 +1,29 @@
+{
+    "experiment": "Voice Wav2Vec2 MC Dropout Uncertainty Quantification",
+    "num_passes": 30,
+    "seed": 42,
+    "baseline_deterministic_metrics": {
+        "method": "Standard Baseline (Deterministic)",
+        "accuracy": 0.6666666666666666,
+        "balanced_accuracy": 0.6666666666666666,
+        "roc_auc": 0.7777777777777778,
+        "nll": 0.6400581525912142,
+        "brier": 0.21846631744186526,
+        "ece": 0.3609461990559094,
+        "entropy_error_auroc": null,
+        "mi_error_auroc": null,
+        "variance_error_auroc": null
+    },
+    "mc_dropout_metrics": {
+        "method": "MC Dropout (N=30, p=0.1)",
+        "accuracy": 0.5,
+        "balanced_accuracy": 0.5,
+        "roc_auc": 0.7777777777777778,
+        "nll": 0.6817166429272041,
+        "brier": 0.2442865207133551,
+        "ece": 0.0075643830829196235,
+        "entropy_error_auroc": 1.0,
+        "mi_error_auroc": 0.22222222222222224,
+        "variance_error_auroc": 0.22222222222222224
+    }
+}

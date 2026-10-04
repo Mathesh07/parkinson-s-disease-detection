@@ -1,0 +1,70 @@
+{
+    "num_members": 5,
+    "seeds": [
+        42,
+        43,
+        44,
+        45,
+        46
+    ],
+    "split_seed": 42,
+    "dataset": "MDVR-KCL",
+    "train_subject_ids": [
+        "ID00",
+        "ID01",
+        "ID03",
+        "ID05",
+        "ID06",
+        "ID07",
+        "ID08",
+        "ID09",
+        "ID12",
+        "ID14",
+        "ID16",
+        "ID17",
+        "ID18",
+        "ID19",
+        "ID20",
+        "ID22",
+        "ID24",
+        "ID25",
+        "ID26",
+        "ID27",
+        "ID28",
+        "ID30",
+        "ID31",
+        "ID32",
+        "ID34",
+        "ID36"
+    ],
+    "validation_subject_ids": [
+        "ID02",
+        "ID11",
+        "ID15",
+        "ID21",
+        "ID33"
+    ],
+    "test_subject_ids": [
+        "ID04",
+        "ID10",
+        "ID13",
+        "ID23",
+        "ID29",
+        "ID35"
+    ],
+    "model_architecture": "facebook/wav2vec2-base + EvidentialHead",
+    "preprocessing_config": {
+        "sample_rate": 16000,
+        "chunk_seconds": 10,
+        "overlap_seconds": 2
+    },
+    "training_config": {
+        "batch_size": 2,
+        "gradient_accumulation_steps": 2,
+        "learning_rate": 1e-05,
+        "weight_decay": 0.01,
+        "epochs": 15,
+        "patience": 5,
+        "freeze_feature_encoder": true
+    }
+}

@@ -99,7 +99,14 @@ class Wav2Vec2ForParkinsons(nn.Module):
         """
         Forward pass through Wav2Vec2 feature & transformer encoders,
         followed by masked temporal pooling and evidential head.
+        Handles both raw audio (B, T) and pre-extracted embeddings (B, 768).
         """
+        if input_values.dim() == 2 and input_values.shape[1] == 768:
+            evidence = self.evidential_head(input_values)
+            if return_embedding:
+                return evidence, input_values
+            return evidence
+
         outputs = self.wav2vec2(
             input_values=input_values,
             attention_mask=attention_mask

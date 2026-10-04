@@ -1,0 +1,33 @@
+{
+    "experiment": "Voice Wav2Vec2 Acoustic Corruption Robustness Testing",
+    "seed": 42,
+    "sample_rate": 16000,
+    "snr_levels": [
+        "Clean",
+        "20dB",
+        "10dB",
+        "5dB",
+        "0dB"
+    ],
+    "noise_type": "Additive Gaussian Noise",
+    "chunk_duration": 10,
+    "chunk_overlap": 2,
+    "model_checkpoint": "best_wav2vec2_model",
+    "mc_dropout_passes": 30,
+    "ensemble_members": 5,
+    "ensemble_seeds": [
+        42,
+        43,
+        44,
+        45,
+        46
+    ],
+    "test_subjects": [
+        "ID04",
+        "ID10",
+        "ID13",
+        "ID23",
+        "ID29",
+        "ID35"
+    ]
+}

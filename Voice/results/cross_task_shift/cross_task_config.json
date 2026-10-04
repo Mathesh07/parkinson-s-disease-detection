@@ -1,0 +1,27 @@
+{
+    "experiment": "Voice Wav2Vec2 Cross-Task Shift Analysis",
+    "tasks": [
+        "ReadText",
+        "SpontaneousDialogue"
+    ],
+    "num_test_subjects": 6,
+    "test_subjects": [
+        "ID04",
+        "ID10",
+        "ID13",
+        "ID23",
+        "ID29",
+        "ID35"
+    ],
+    "seed": 42,
+    "split_seed": 42,
+    "mc_dropout_passes": 30,
+    "ensemble_members": 5,
+    "ensemble_seeds": [
+        42,
+        43,
+        44,
+        45,
+        46
+    ]
+}

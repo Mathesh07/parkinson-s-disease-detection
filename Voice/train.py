@@ -201,18 +201,27 @@ def save_checkpoint(
         json.dump(meta, f, indent=4)
 
 
-def train():
-    """Main training execution function."""
+def train(
+    seed: int = config.RANDOM_SEED,
+    split_seed: int = config.RANDOM_SEED,
+    save_dir: Optional[Path] = None
+):
+    """Main training execution function with seed and output directory customization."""
     print("=" * 50)
     print("WAV2VEC2 PARKINSON'S VOICE CLASSIFICATION")
+    print(f"Training Seed: {seed} | Split Seed: {split_seed}")
     print("=" * 50)
 
-    set_seed(config.RANDOM_SEED)
+    set_seed(seed)
     device = get_device()
 
-    # 1. Build metadata and subject splits
+    target_checkpoint_dir = save_dir if save_dir is not None else config.CHECKPOINT_DIR
+    target_checkpoint_dir.mkdir(parents=True, exist_ok=True)
+    member_dir = target_checkpoint_dir.parent if save_dir is not None else config.RESULTS_DIR
+
+    # 1. Build metadata and subject splits (strictly using split_seed to guarantee identical partition)
     metadata_df = build_metadata()
-    train_df, val_df, test_df = create_subject_splits(metadata_df)
+    train_df, val_df, test_df = create_subject_splits(metadata_df, seed=split_seed)
 
     print(f"\nDataset: MDVR-KCL")
     print(f"Model Backbone: {config.MODEL_NAME}\n")
@@ -235,11 +244,16 @@ def train():
 
     print(f"Audio Chunks: Train={len(train_dataset)}, Validation={len(val_dataset)}")
 
+    # Ensure DataLoader reproducibility with generator seed
+    g = torch.Generator()
+    g.manual_seed(seed)
+
     train_loader = DataLoader(
         train_dataset,
         batch_size=config.BATCH_SIZE,
         shuffle=True,
-        collate_fn=collate_audio_batch
+        collate_fn=collate_audio_batch,
+        generator=g
     )
     val_loader = DataLoader(
         val_dataset,
@@ -292,6 +306,7 @@ def train():
     best_val_f1 = -1.0
     best_epoch = 0
     patience_counter = 0
+    best_val_metrics = {}
 
     print("\nStarting training...\n")
 
@@ -337,11 +352,12 @@ def train():
         )
 
         # Checkpointing based on Subject-Level Validation F1
-        if val_f1 > best_val_f1 or (val_f1 == best_val_f1 and val_loss < history["val_loss"][best_epoch - 1]):
+        if val_f1 > best_val_f1 or (val_f1 == best_val_f1 and val_loss < (history["val_loss"][best_epoch - 1] if best_epoch > 0 else 1e9)):
             best_val_f1 = val_f1
             best_epoch = epoch
             patience_counter = 0
-            save_checkpoint(model, processor, val_sub_m, epoch)
+            best_val_metrics = val_sub_m
+            save_checkpoint(model, processor, val_sub_m, epoch, save_dir=target_checkpoint_dir)
             print(f"  --> Saved new best checkpoint at Epoch {epoch} (Val F1: {best_val_f1:.4f})")
         else:
             patience_counter += 1
@@ -352,13 +368,39 @@ def train():
     print(f"\nTraining completed! Best Validation Subject F1: {best_val_f1:.4f} at Epoch {best_epoch}")
 
     # 5. Save History & Plots
-    with open(config.TRAINING_HISTORY_PATH, "w") as f:
+    history_file = member_dir / "training_history.json"
+    metrics_file = member_dir / "metrics.json"
+
+    with open(history_file, "w") as f:
         json.dump(history, f, indent=4)
 
-    plot_training_curves(history, config.TRAINING_CURVES_PATH)
-    print(f"Saved training curves to: {config.TRAINING_CURVES_PATH}")
-    print(f"Best model checkpoint saved to: {config.CHECKPOINT_DIR}")
+    with open(metrics_file, "w") as f:
+        json.dump({
+            "best_epoch": best_epoch,
+            "best_val_subject_f1": best_val_f1,
+            "val_metrics": best_val_metrics,
+            "seed": seed,
+            "split_seed": split_seed
+        }, f, indent=4)
+
+    curves_file = member_dir / "training_curves.png" if save_dir is not None else config.TRAINING_CURVES_PATH
+    plot_training_curves(history, curves_file)
+    print(f"Saved training curves to: {curves_file}")
+    print(f"Best model checkpoint saved to: {target_checkpoint_dir}")
+
+
+def main():
+    import argparse
+    parser = argparse.ArgumentParser(description="Train Wav2Vec2 Parkinson's Disease Classifier.")
+    parser.add_argument("--seed", type=int, default=config.RANDOM_SEED, help="Random seed for model initialization and training")
+    parser.add_argument("--split_seed", type=int, default=config.RANDOM_SEED, help="Random seed for dataset subject split")
+    parser.add_argument("--save_dir", type=str, default=None, help="Directory to save model checkpoint")
+    args = parser.parse_args()
+
+    save_path = Path(args.save_dir) if args.save_dir else None
+    train(seed=args.seed, split_seed=args.split_seed, save_dir=save_path)
 
 
 if __name__ == "__main__":
-    train()
+    main()
+

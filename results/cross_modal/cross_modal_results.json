@@ -1,0 +1,183 @@
+{
+    "config": {
+        "experiment": "Cross-Modal Reliability Fusion (Gait + Voice)",
+        "paired_subjects_note": "Gait (PhysioNet Ga/Ju/Si) and Voice (MDVR-KCL) cohorts are distinct. Synthetic pairings are used strictly for demonstrating decision-level fusion logic.",
+        "scenarios_evaluated": 4
+    },
+    "demonstration_results": [
+        {
+            "gait": {
+                "modality": "Gait",
+                "prediction": "Parkinson's Disease",
+                "predicted_label": 1,
+                "p_pd": 0.89,
+                "p_healthy": 0.11,
+                "uncertainty": 0.35,
+                "conformal_set": [
+                    "Parkinson's Disease"
+                ],
+                "conformal_set_size": 1,
+                "reliability": "ACCEPT",
+                "reliability_level": "HIGH",
+                "reasons": []
+            },
+            "voice": {
+                "modality": "Voice",
+                "prediction": "Parkinson's Disease",
+                "predicted_label": 1,
+                "p_pd": 0.79,
+                "p_healthy": 0.21,
+                "uncertainty": 0.4,
+                "conformal_set": [
+                    "Parkinson's Disease"
+                ],
+                "conformal_set_size": 1,
+                "reliability": "ACCEPT",
+                "reliability_level": "HIGH",
+                "reasons": []
+            },
+            "prediction_agreement": true,
+            "conformal_agreement_status": "CONFORMAL_AGREEMENT",
+            "cross_modal_status": "CONSISTENT",
+            "cross_modal_reliability": "HIGH",
+            "final_decision": "ACCEPT",
+            "reason": "CROSS_MODAL_AGREEMENT",
+            "evidence_summary": [
+                "Gait and Voice predictions concur on Parkinson's Disease.",
+                "Both modalities report HIGH reliability.",
+                "Conformal prediction sets concur on [\"Parkinson's Disease\"]."
+            ],
+            "scenario_title": "CASE 1: STRONG CROSS-MODAL AGREEMENT (PD)"
+        },
+        {
+            "gait": {
+                "modality": "Gait",
+                "prediction": "Parkinson's Disease",
+                "predicted_label": 1,
+                "p_pd": 0.85,
+                "p_healthy": 0.15,
+                "uncertainty": 0.32,
+                "conformal_set": [
+                    "Parkinson's Disease"
+                ],
+                "conformal_set_size": 1,
+                "reliability": "ACCEPT",
+                "reliability_level": "HIGH",
+                "reasons": []
+            },
+            "voice": {
+                "modality": "Voice",
+                "prediction": "Healthy Control",
+                "predicted_label": 0,
+                "p_pd": 0.35,
+                "p_healthy": 0.65,
+                "uncertainty": 0.45,
+                "conformal_set": [
+                    "Healthy Control"
+                ],
+                "conformal_set_size": 1,
+                "reliability": "ACCEPT",
+                "reliability_level": "HIGH",
+                "reasons": []
+            },
+            "prediction_agreement": false,
+            "conformal_agreement_status": "CONFORMAL_CONFLICT",
+            "cross_modal_status": "MODALITY_CONFLICT",
+            "cross_modal_reliability": "LOW",
+            "final_decision": "FLAG",
+            "reason": "GAIT_VOICE_CONFLICT",
+            "evidence_summary": [
+                "Gait predicts Parkinson's Disease (P=85.0%), whereas Voice predicts Healthy Control (P=35.0%).",
+                "Direct prediction disagreement detected between modalities.",
+                "Prediction flagged due to cross-modal evidence conflict."
+            ],
+            "scenario_title": "CASE 2: DIRECT MODALITY CONFLICT (PD vs Healthy)"
+        },
+        {
+            "gait": {
+                "modality": "Gait",
+                "prediction": "Parkinson's Disease",
+                "predicted_label": 1,
+                "p_pd": 0.88,
+                "p_healthy": 0.12,
+                "uncertainty": 0.3,
+                "conformal_set": [
+                    "Parkinson's Disease"
+                ],
+                "conformal_set_size": 1,
+                "reliability": "ACCEPT",
+                "reliability_level": "HIGH",
+                "reasons": []
+            },
+            "voice": {
+                "modality": "Voice",
+                "prediction": "Parkinson's Disease",
+                "predicted_label": 1,
+                "p_pd": 0.569,
+                "p_healthy": 0.431,
+                "uncertainty": 0.6835,
+                "conformal_set": [],
+                "conformal_set_size": 0,
+                "reliability": "FLAG",
+                "reliability_level": "LOW",
+                "reasons": []
+            },
+            "prediction_agreement": true,
+            "conformal_agreement_status": "UNCERTAIN_CONFORMAL_EVIDENCE",
+            "cross_modal_status": "PARTIAL_SUPPORT",
+            "cross_modal_reliability": "MEDIUM",
+            "final_decision": "FLAG",
+            "reason": "ONE_MODALITY_UNCERTAIN",
+            "evidence_summary": [
+                "Gait and Voice predictions concur on Parkinson's Disease.",
+                "Voice reliability is LOW (Flagged).",
+                "Conformal status: UNCERTAIN_CONFORMAL_EVIDENCE."
+            ],
+            "scenario_title": "CASE 3: AGREEMENT BUT VOICE UNCERTAIN (FLAGGED)"
+        },
+        {
+            "gait": {
+                "modality": "Gait",
+                "prediction": "Healthy Control",
+                "predicted_label": 0,
+                "p_pd": 0.15,
+                "p_healthy": 0.85,
+                "uncertainty": 0.25,
+                "conformal_set": [
+                    "Healthy Control"
+                ],
+                "conformal_set_size": 1,
+                "reliability": "ACCEPT",
+                "reliability_level": "HIGH",
+                "reasons": []
+            },
+            "voice": {
+                "modality": "Voice",
+                "prediction": "Healthy Control",
+                "predicted_label": 0,
+                "p_pd": 0.18,
+                "p_healthy": 0.82,
+                "uncertainty": 0.28,
+                "conformal_set": [
+                    "Healthy Control"
+                ],
+                "conformal_set_size": 1,
+                "reliability": "ACCEPT",
+                "reliability_level": "HIGH",
+                "reasons": []
+            },
+            "prediction_agreement": true,
+            "conformal_agreement_status": "CONFORMAL_AGREEMENT",
+            "cross_modal_status": "CONSISTENT",
+            "cross_modal_reliability": "HIGH",
+            "final_decision": "ACCEPT",
+            "reason": "CROSS_MODAL_AGREEMENT",
+            "evidence_summary": [
+                "Gait and Voice predictions concur on Healthy Control.",
+                "Both modalities report HIGH reliability.",
+                "Conformal prediction sets concur on ['Healthy Control']."
+            ],
+            "scenario_title": "CASE 4: STRONG CROSS-MODAL AGREEMENT (Healthy)"
+        }
+    ]
+}

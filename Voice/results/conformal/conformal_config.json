@@ -1,0 +1,24 @@
+{
+    "experiment": "Voice Wav2Vec2 Split Conformal Prediction",
+    "seed": 42,
+    "alpha": 0.1,
+    "target_coverage": 0.9,
+    "calibration_subjects": [
+        "ID02",
+        "ID11",
+        "ID15",
+        "ID21",
+        "ID33"
+    ],
+    "test_subjects": [
+        "ID04",
+        "ID10",
+        "ID13",
+        "ID23",
+        "ID29",
+        "ID35"
+    ],
+    "n_calibration": 5,
+    "n_test": 6,
+    "small_sample_warning": "n=5 calibration subjects yields coarse finite-sample quantile (q_hat = max(s_i)). Results are exploratory and do not constitute clinical validation."
+}

@@ -1,0 +1,76 @@
+{
+    "config": {
+        "experiment": "Voice Wav2Vec2 Split Conformal Prediction",
+        "seed": 42,
+        "alpha": 0.1,
+        "target_coverage": 0.9,
+        "calibration_subjects": [
+            "ID02",
+            "ID11",
+            "ID15",
+            "ID21",
+            "ID33"
+        ],
+        "test_subjects": [
+            "ID04",
+            "ID10",
+            "ID13",
+            "ID23",
+            "ID29",
+            "ID35"
+        ],
+        "n_calibration": 5,
+        "n_test": 6,
+        "small_sample_warning": "n=5 calibration subjects yields coarse finite-sample quantile (q_hat = max(s_i)). Results are exploratory and do not constitute clinical validation."
+    },
+    "baseline": {
+        "n_test_subjects": 6,
+        "alpha": 0.1,
+        "target_coverage": 0.9,
+        "q_hat": 0.4961361289024353,
+        "empirical_coverage": 0.5,
+        "average_set_size": 0.6666666666666666,
+        "singleton_rate": 0.6666666666666666,
+        "ambiguous_rate": 0.0,
+        "empty_rate": 0.3333333333333333,
+        "class_coverage": {
+            "Healthy_Control": 0.3333333333333333,
+            "Parkinsons_Disease": 0.6666666666666666
+        },
+        "point_prediction_confusion_matrix": [
+            [
+                1,
+                2
+            ],
+            [
+                0,
+                3
+            ]
+        ]
+    },
+    "deep_ensemble": {
+        "n_test_subjects": 6,
+        "alpha": 0.1,
+        "target_coverage": 0.9,
+        "q_hat": 0.40755214095115666,
+        "empirical_coverage": 0.3333333333333333,
+        "average_set_size": 0.3333333333333333,
+        "singleton_rate": 0.3333333333333333,
+        "ambiguous_rate": 0.0,
+        "empty_rate": 0.6666666666666666,
+        "class_coverage": {
+            "Healthy_Control": 0.3333333333333333,
+            "Parkinsons_Disease": 0.3333333333333333
+        },
+        "point_prediction_confusion_matrix": [
+            [
+                2,
+                1
+            ],
+            [
+                1,
+                2
+            ]
+        ]
+    }
+}

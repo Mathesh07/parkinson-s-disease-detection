@@ -1,0 +1,86 @@
+{
+    "ReadText": {
+        "num_subjects": 6,
+        "baseline": {
+            "accuracy": 0.5,
+            "balanced_accuracy": 0.5,
+            "roc_auc": 0.7777777777777778,
+            "nll": 0.6833790454375052,
+            "brier": 0.24511885752597248,
+            "ece": 0.010629191994667053,
+            "mean_probability": 0.5065367271502813,
+            "median_probability": 0.5066870748996735,
+            "mean_confidence": 0.010629191994667053
+        },
+        "mc_dropout": {
+            "accuracy": 0.5,
+            "balanced_accuracy": 0.5,
+            "roc_auc": 0.7777777777777778,
+            "nll": 0.6826807861133645,
+            "brier": 0.24476996698380826,
+            "ece": 0.01121616015831628,
+            "mean_entropy": 0.6928122825986213,
+            "median_entropy": 0.69292427339733,
+            "mean_variance": 8.78877223836843e-05,
+            "median_variance": 9.276163706821666e-05,
+            "mean_mutual_info": 0.0001759368714116157,
+            "median_mutual_info": 0.00018575942904630605
+        },
+        "deep_ensemble": {
+            "accuracy": 0.6666666666666666,
+            "balanced_accuracy": 0.6666666666666666,
+            "roc_auc": 0.6666666666666667,
+            "nll": 0.66475968934133,
+            "brier": 0.23600422612170754,
+            "ece": 0.18187832633654277,
+            "mean_entropy": 0.6756204191380505,
+            "median_entropy": 0.6734073963154994,
+            "mean_variance": 0.018879417329676493,
+            "median_variance": 0.022548252200605676,
+            "mean_mutual_info": 0.04568651049652944,
+            "median_mutual_info": 0.053990075813592275
+        }
+    },
+    "SpontaneousDialogue": {
+        "num_subjects": 6,
+        "baseline": {
+            "accuracy": 0.8333333333333334,
+            "balanced_accuracy": 0.8333333333333333,
+            "roc_auc": 1.0,
+            "nll": 0.6811916181606477,
+            "brier": 0.2440231850202149,
+            "ece": 0.32636450727780664,
+            "mean_probability": 0.5045270423094431,
+            "median_probability": 0.5050521194934845,
+            "mean_confidence": 0.006968826055526733
+        },
+        "mc_dropout": {
+            "accuracy": 0.8333333333333334,
+            "balanced_accuracy": 0.8333333333333333,
+            "roc_auc": 1.0,
+            "nll": 0.6807859928647918,
+            "brier": 0.2438202850615261,
+            "ece": 0.3266668796539307,
+            "mean_entropy": 0.6930239334212214,
+            "median_entropy": 0.6930702917987787,
+            "mean_variance": 4.676100393647898e-05,
+            "median_variance": 4.606896167740547e-05,
+            "mean_mutual_info": 9.355133205365036e-05,
+            "median_mutual_info": 9.218408410954781e-05
+        },
+        "deep_ensemble": {
+            "accuracy": 0.8333333333333334,
+            "balanced_accuracy": 0.8333333333333333,
+            "roc_auc": 0.7777777777777778,
+            "nll": 0.6300313376257275,
+            "brier": 0.21862370655823046,
+            "ece": 0.277515566845735,
+            "mean_entropy": 0.686057014175424,
+            "median_entropy": 0.6864594832440514,
+            "mean_variance": 0.008273063941032294,
+            "median_variance": 0.007289664518429717,
+            "mean_mutual_info": 0.01793483090001648,
+            "median_mutual_info": 0.015355459228671486
+        }
+    }
+}

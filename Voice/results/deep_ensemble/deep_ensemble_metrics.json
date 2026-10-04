@@ -1,0 +1,90 @@
+{
+    "experiment": "Voice Wav2Vec2 Deep Ensemble Uncertainty Quantification",
+    "num_members": 5,
+    "seeds": [
+        42,
+        43,
+        44,
+        45,
+        46
+    ],
+    "split_seed": 42,
+    "baseline_deterministic_metrics": {
+        "method": "Standard Baseline (Deterministic)",
+        "accuracy": 0.6666666666666666,
+        "balanced_accuracy": 0.6666666666666666,
+        "roc_auc": 0.7777777777777778,
+        "nll": 0.6400581525912142,
+        "brier": 0.21846631744186526,
+        "ece": 0.3609461990559094,
+        "entropy_error_auroc": null,
+        "mi_error_auroc": null,
+        "variance_error_auroc": null
+    },
+    "mc_dropout_metrics": {
+        "method": "MC Dropout (N=30, p=0.1)",
+        "accuracy": 0.5,
+        "balanced_accuracy": 0.5,
+        "roc_auc": 0.7777777777777778,
+        "nll": 0.6817166429272041,
+        "brier": 0.2442865207133551,
+        "ece": 0.0075643830829196235,
+        "entropy_error_auroc": 1.0,
+        "mi_error_auroc": 0.22222222222222224,
+        "variance_error_auroc": 0.22222222222222224
+    },
+    "deep_ensemble_metrics": {
+        "method": "Deep Ensemble (M=5)",
+        "accuracy": 0.6666666666666666,
+        "balanced_accuracy": 0.6666666666666666,
+        "roc_auc": 0.7777777777777778,
+        "nll": 0.6466439748092442,
+        "brier": 0.2270169502799452,
+        "ece": 0.10015196452538166,
+        "entropy_error_auroc": 0.625,
+        "mi_error_auroc": 0.375,
+        "variance_error_auroc": 0.375
+    },
+    "individual_member_test_performance": [
+        {
+            "member": 0,
+            "seed": 42,
+            "accuracy": 0.6666666666666666,
+            "roc_auc": 0.7777777777777778,
+            "nll": 0.6303639841142289,
+            "brier": 0.22309863596927884
+        },
+        {
+            "member": 1,
+            "seed": 43,
+            "accuracy": 0.6666666666666666,
+            "roc_auc": 0.7777777777777778,
+            "nll": 0.6576269238540392,
+            "brier": 0.2323775517912511
+        },
+        {
+            "member": 2,
+            "seed": 44,
+            "accuracy": 0.6666666666666666,
+            "roc_auc": 0.5555555555555556,
+            "nll": 0.6926577667716932,
+            "brier": 0.249753967423452
+        },
+        {
+            "member": 3,
+            "seed": 45,
+            "accuracy": 0.5,
+            "roc_auc": 0.6666666666666666,
+            "nll": 0.6890825601714791,
+            "brier": 0.24796251901941715
+        },
+        {
+            "member": 4,
+            "seed": 46,
+            "accuracy": 0.8333333333333334,
+            "roc_auc": 0.7777777777777778,
+            "nll": 0.6777984737906754,
+            "brier": 0.2423351153676614
+        }
+    ]
+}

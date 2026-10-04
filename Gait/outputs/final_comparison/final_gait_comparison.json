@@ -1,0 +1,54 @@
+[
+    {
+        "Method": "Softmax",
+        "Balanced Accuracy": 0.5824156175880314,
+        "ROC-AUC": 0.6643787629994525,
+        "NLL": 2.1735293162119045,
+        "Brier": 0.3006423587466354,
+        "ECE": 0.2952654971717666,
+        "Error Detection AUROC": 0.6449602060700407,
+        "AURC": 0.3136454468173032,
+        "Mean uncertainty correct": 0.087062955153505,
+        "Mean uncertainty incorrect": 0.1483215022048343,
+        "Uncertainty Ratio (Inc/Corr)": 1.7036120809742943
+    },
+    {
+        "Method": "Temperature Scaling",
+        "Balanced Accuracy": 0.5824156175880314,
+        "ROC-AUC": 0.660467068053275,
+        "NLL": 0.9152664844537028,
+        "Brier": 0.2567513675020733,
+        "ECE": 0.1998252600673158,
+        "Error Detection AUROC": 0.6456275324037273,
+        "AURC": 0.2977898302958133,
+        "Mean uncertainty correct": 0.1760934370220478,
+        "Mean uncertainty incorrect": 0.2559598544011667,
+        "Uncertainty Ratio (Inc/Corr)": 1.4535456785315584
+    },
+    {
+        "Method": "EDL",
+        "Balanced Accuracy": 0.5824156175880314,
+        "ROC-AUC": 0.66103995621237,
+        "NLL": 0.7854594475929515,
+        "Brier": 0.24898997435693757,
+        "ECE": 0.174,
+        "Error Detection AUROC": 0.6012856261592474,
+        "AURC": 0.285,
+        "Mean uncertainty correct": 0.25094342930391944,
+        "Mean uncertainty incorrect": 0.2841346389799578,
+        "Uncertainty Ratio (Inc/Corr)": 1.1322657053348872
+    },
+    {
+        "Method": "MC Dropout",
+        "Balanced Accuracy": 0.5861923006750592,
+        "ROC-AUC": 0.6586663017697499,
+        "NLL": 1.7779188484456645,
+        "Brier": 0.2858979397822954,
+        "ECE": 0.2667371009760711,
+        "Error Detection AUROC": 0.6425295314289622,
+        "AURC": 0.2869540126777434,
+        "Mean uncertainty correct": 0.1928161139493434,
+        "Mean uncertainty incorrect": 0.2830977378454403,
+        "Uncertainty Ratio (Inc/Corr)": 1.4682265504003242
+    }
+]
