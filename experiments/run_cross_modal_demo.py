@@ -1,14 +1,10 @@
-"""Phase 9 Experiment: Cross-Modal Reliability Fusion Live Demo & Evaluation.
+"""Phase 9 Experiment: Tri-Modal Cross-Modal Reliability Fusion Live Demo & Evaluation.
 
-Demonstrates decision-level fusion of Gait and Voice reliability engine outputs across:
-    - CASE 1: Strong Cross-Modal Agreement (CONSISTENT -> ACCEPT)
-    - CASE 2: Direct Modality Conflict (MODALITY_CONFLICT -> FLAG)
-    - CASE 3: Partial Support / One Modality Uncertain (PARTIAL_SUPPORT -> FLAG)
-
-Important Note on Paired Subjects:
-    Gait (PhysioNet Ga/Ju/Si) and Voice (MDVR-KCL) originate from distinct clinical cohorts.
-    No true paired subjects exist across datasets. Demonstrations use synthetic pairings
-    of existing modality-level outputs strictly for evaluating fusion logic.
+Demonstrates decision-level fusion across Gait, Voice, and Handwriting reliability outputs:
+    - CASE 1: Strong Tri-Modal Agreement (CONSISTENT -> ACCEPT)
+    - CASE 2: Modality Conflict (2 vs 1: Gait & Voice PD vs Handwriting Healthy -> FLAG)
+    - CASE 3: Partial Support / Handwriting Modality Uncertain (PARTIAL_SUPPORT -> FLAG)
+    - CASE 4: Strong Tri-Modal Agreement for Healthy Control (CONSISTENT -> ACCEPT)
 
 Outputs:
     - results/cross_modal/cross_modal_config.json
@@ -44,35 +40,14 @@ SUMMARY_CSV = CROSS_MODAL_DIR / "cross_modal_summary.csv"
 FIG_DASHBOARD = CROSS_MODAL_DIR / "cross_modal_dashboard.png"
 
 
-def load_gait_results() -> List[Dict]:
-    """Load existing Gait reliability results."""
-    gait_json = root_dir / "Gait" / "outputs" / "reliability" / "reliability_results.json"
-    if gait_json.exists():
-        with open(gait_json, "r") as f:
-            return json.load(f)
-    return []
-
-
-def load_voice_results() -> Dict:
-    """Load existing Voice reliability results."""
-    voice_json = root_dir / "Voice" / "results" / "reliability" / "reliability_results.json"
-    if voice_json.exists():
-        with open(voice_json, "r") as f:
-            return json.load(f)
-    return {}
-
-
 def run_cross_modal_demo():
-    """Run Phase 9 Cross-Modal Reliability Fusion live demo."""
+    """Run Tri-Modal Cross-Modal Reliability Fusion live demo."""
     engine = CrossModalReliabilityEngine()
 
-    voice_res = load_voice_results()
-    voice_subs = voice_res.get("subject_results", [])
-
-    # 1. Define Representative Demonstration Scenarios (Synthetic Pairings)
+    # 1. Define Representative Demonstration Scenarios across all 3 Modalities
     scenarios = [
         {
-            "scenario": "CASE 1: STRONG CROSS-MODAL AGREEMENT (PD)",
+            "scenario": "CASE 1: STRONG TRI-MODAL AGREEMENT (PD)",
             "gait": {
                 "prediction": "Parkinson's Disease", "predicted_label": 1,
                 "p_pd": 0.89, "p_healthy": 0.11, "uncertainty": 0.35,
@@ -84,10 +59,16 @@ def run_cross_modal_demo():
                 "p_pd": 0.79, "p_healthy": 0.21, "uncertainty": 0.40,
                 "conformal_prediction_set": ["Parkinson's Disease"],
                 "reliability": "ACCEPT", "reliability_level": "HIGH"
+            },
+            "handwriting": {
+                "prediction": "Parkinson's Disease", "predicted_label": 1,
+                "p_pd": 0.865, "p_healthy": 0.135, "uncertainty": 0.315,
+                "conformal_prediction_set": ["Parkinson's Disease"],
+                "reliability": "ACCEPT", "reliability_level": "HIGH"
             }
         },
         {
-            "scenario": "CASE 2: DIRECT MODALITY CONFLICT (PD vs Healthy)",
+            "scenario": "CASE 2: DIRECT MODALITY CONFLICT (2 vs 1)",
             "gait": {
                 "prediction": "Parkinson's Disease", "predicted_label": 1,
                 "p_pd": 0.85, "p_healthy": 0.15, "uncertainty": 0.32,
@@ -95,14 +76,20 @@ def run_cross_modal_demo():
                 "reliability": "ACCEPT", "reliability_level": "HIGH"
             },
             "voice": {
+                "prediction": "Parkinson's Disease", "predicted_label": 1,
+                "p_pd": 0.80, "p_healthy": 0.20, "uncertainty": 0.39,
+                "conformal_prediction_set": ["Parkinson's Disease"],
+                "reliability": "ACCEPT", "reliability_level": "HIGH"
+            },
+            "handwriting": {
                 "prediction": "Healthy Control", "predicted_label": 0,
-                "p_pd": 0.35, "p_healthy": 0.65, "uncertainty": 0.45,
+                "p_pd": 0.22, "p_healthy": 0.78, "uncertainty": 0.34,
                 "conformal_prediction_set": ["Healthy Control"],
                 "reliability": "ACCEPT", "reliability_level": "HIGH"
             }
         },
         {
-            "scenario": "CASE 3: AGREEMENT BUT VOICE UNCERTAIN (FLAGGED)",
+            "scenario": "CASE 3: AGREEMENT BUT HANDWRITING UNCERTAIN",
             "gait": {
                 "prediction": "Parkinson's Disease", "predicted_label": 1,
                 "p_pd": 0.88, "p_healthy": 0.12, "uncertainty": 0.30,
@@ -111,22 +98,34 @@ def run_cross_modal_demo():
             },
             "voice": {
                 "prediction": "Parkinson's Disease", "predicted_label": 1,
-                "p_pd": 0.569, "p_healthy": 0.431, "uncertainty": 0.6835,
+                "p_pd": 0.81, "p_healthy": 0.19, "uncertainty": 0.38,
+                "conformal_prediction_set": ["Parkinson's Disease"],
+                "reliability": "ACCEPT", "reliability_level": "HIGH"
+            },
+            "handwriting": {
+                "prediction": "Parkinson's Disease", "predicted_label": 1,
+                "p_pd": 0.545, "p_healthy": 0.455, "uncertainty": 0.582,
                 "conformal_prediction_set": [],
-                "reliability": "FLAG", "reliability_level": "LOW"
+                "reliability": "FLAG", "reliability_level": "MEDIUM"
             }
         },
         {
-            "scenario": "CASE 4: STRONG CROSS-MODAL AGREEMENT (Healthy)",
+            "scenario": "CASE 4: STRONG TRI-MODAL AGREEMENT (Healthy)",
             "gait": {
                 "prediction": "Healthy Control", "predicted_label": 0,
-                "p_pd": 0.15, "p_healthy": 0.85, "uncertainty": 0.25,
+                "p_pd": 0.11, "p_healthy": 0.89, "uncertainty": 0.28,
                 "conformal_prediction_set": ["Healthy Control"],
                 "reliability": "ACCEPT", "reliability_level": "HIGH"
             },
             "voice": {
                 "prediction": "Healthy Control", "predicted_label": 0,
-                "p_pd": 0.18, "p_healthy": 0.82, "uncertainty": 0.28,
+                "p_pd": 0.14, "p_healthy": 0.86, "uncertainty": 0.33,
+                "conformal_prediction_set": ["Healthy Control"],
+                "reliability": "ACCEPT", "reliability_level": "HIGH"
+            },
+            "handwriting": {
+                "prediction": "Healthy Control", "predicted_label": 0,
+                "p_pd": 0.135, "p_healthy": 0.865, "uncertainty": 0.29,
                 "conformal_prediction_set": ["Healthy Control"],
                 "reliability": "ACCEPT", "reliability_level": "HIGH"
             }
@@ -135,7 +134,7 @@ def run_cross_modal_demo():
 
     fusion_results = []
     for sc in scenarios:
-        fused = engine.fuse_modalities(sc["gait"], sc["voice"])
+        fused = engine.fuse_modalities(sc["gait"], sc["voice"], sc["handwriting"])
         fused["scenario_title"] = sc["scenario"]
         fusion_results.append(fused)
 
@@ -144,8 +143,9 @@ def run_cross_modal_demo():
 
     # 3. Save JSON & CSV Artifacts
     config_data = {
-        "experiment": "Cross-Modal Reliability Fusion (Gait + Voice)",
-        "paired_subjects_note": "Gait (PhysioNet Ga/Ju/Si) and Voice (MDVR-KCL) cohorts are distinct. Synthetic pairings are used strictly for demonstrating decision-level fusion logic.",
+        "experiment": "Tri-Modal Reliability Fusion (Gait + Voice + Handwriting)",
+        "modalities": ["Gait", "Voice", "Handwriting"],
+        "paired_subjects_note": "Gait (PhysioNet Ga/Ju/Si), Voice (MDVR-KCL), and Handwriting (NewHandPD) cohorts are distinct. Synthetic pairings evaluate decision-level tri-modal fusion logic.",
         "scenarios_evaluated": len(scenarios)
     }
     with open(CONFIG_JSON, "w") as f:
@@ -162,12 +162,14 @@ def run_cross_modal_demo():
     summary_rows = [
         {
             "scenario": r["scenario_title"],
+            "fused_prediction": r["fused_prediction"],
+            "fused_p_pd": r["fused_p_pd"],
             "gait_pred": r["gait"]["prediction"],
             "gait_p_pd": r["gait"]["p_pd"],
-            "gait_rel": r["gait"]["reliability"],
             "voice_pred": r["voice"]["prediction"],
             "voice_p_pd": r["voice"]["p_pd"],
-            "voice_rel": r["voice"]["reliability"],
+            "hw_pred": r["handwriting"]["prediction"],
+            "hw_p_pd": r["handwriting"]["p_pd"],
             "pred_agree": r["prediction_agreement"],
             "conformal_status": r["conformal_agreement_status"],
             "cross_modal_status": r["cross_modal_status"],
@@ -187,62 +189,56 @@ def run_cross_modal_demo():
 
 
 def print_cross_modal_terminal_demo(results: List[Dict]):
-    """Print terminal live-demo output in exact requested format."""
-    print("\n" + "=" * 65)
-    print("        PARKINSON'S CROSS-MODAL RELIABILITY FUSION")
-    print("=" * 65)
+    """Print terminal live-demo output in structured format."""
+    print("\n" + "=" * 70)
+    print("        TRI-MODAL PARKINSON'S CROSS-MODAL RELIABILITY FUSION")
+    print("=" * 70)
 
     for r in results:
-        print("\n" + "-" * 65)
+        print("\n" + "-" * 70)
         print(f"  {r['scenario_title']}")
-        print("-" * 65)
+        print("-" * 70)
         
         g = r["gait"]
         v = r["voice"]
+        h = r["handwriting"]
 
-        print("GAIT MODALITY:")
-        print(f"  Prediction:       {g['prediction']}")
-        print(f"  P(PD):            {g['p_pd']*100:.1f}%")
-        print(f"  Conformal Set:    {g['conformal_set']}")
-        print(f"  Reliability:      {g['reliability']} ({g['reliability_level']})")
+        print(f"GAIT:        Pred={g['prediction']:<20} P(PD)={g['p_pd']*100:>5.1f}% | Set={str(g['conformal_set']):<25} | [{g['reliability']}]")
+        print(f"VOICE:       Pred={v['prediction']:<20} P(PD)={v['p_pd']*100:>5.1f}% | Set={str(v['conformal_set']):<25} | [{v['reliability']}]")
+        print(f"HANDWRITING: Pred={h['prediction']:<20} P(PD)={h['p_pd']*100:>5.1f}% | Set={str(h['conformal_set']):<25} | [{h['reliability']}]")
 
-        print("\nVOICE MODALITY:")
-        print(f"  Prediction:       {v['prediction']}")
-        print(f"  P(PD):            {v['p_pd']*100:.1f}%")
-        print(f"  Conformal Set:    {v['conformal_set']}")
-        print(f"  Reliability:      {v['reliability']} ({v['reliability_level']})")
+        print("\nTRI-MODAL SYNTHESIS & FINAL PREDICTION:")
+        print(f"  Final Prediction:  {r['fused_prediction']} (Fused P(PD) = {r['fused_p_pd']*100:.1f}%)")
+        print(f"  Consensus Status:  {'3/3 UNANIMOUS' if r['prediction_agreement'] else '2/3 MAJORITY (CONFLICT)'}")
+        print(f"  Conformal Status:  {r['conformal_agreement_status']}")
+        print(f"  System Decision:   [{r['final_decision']}] (Reliability: {r['cross_modal_reliability']})")
+        print(f"  Policy Reason:     {r['reason']}")
+        print("-" * 70)
 
-        print("\nCROSS-MODAL EVIDENCE:")
-        print(f"  Prediction Agree: {'YES' if r['prediction_agreement'] else 'NO'}")
-        print(f"  Conformal Status: {r['conformal_agreement_status']}")
-        print(f"  Final Status:     {r['cross_modal_status']}")
-        print(f"  Final Reliability:{r['cross_modal_reliability']}")
-        print(f"  Final Decision:   [{r['final_decision']}]")
-        print(f"  Reason:           {r['reason']}")
-        print("-" * 65)
-
-    print("=" * 65 + "\n")
+    print("=" * 70 + "\n")
 
 
 def generate_cross_modal_dashboard(results: List[Dict]):
-    """Generate publication-quality cross-modal fusion dashboard figure."""
-    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(13, 9), dpi=300)
+    """Generate publication-quality tri-modal fusion dashboard figure."""
+    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(14, 10), dpi=300)
 
     scenarios = [f"Case {i+1}" for i in range(len(results))]
     x = np.arange(len(scenarios))
-    width = 0.35
+    width = 0.25
 
     gait_pds = [r["gait"]["p_pd"] for r in results]
     voice_pds = [r["voice"]["p_pd"] for r in results]
+    hw_pds = [r["handwriting"]["p_pd"] for r in results]
 
-    # Panel A: Gait vs Voice P(PD)
-    ax1.bar(x - width/2, gait_pds, width, label="Gait P(PD)", color="#1f77b4", edgecolor="black")
-    ax1.bar(x + width/2, voice_pds, width, label="Voice P(PD)", color="#ff7f0e", edgecolor="black")
+    # Panel A: Gait vs Voice vs Handwriting P(PD)
+    ax1.bar(x - width, gait_pds, width, label="Gait P(PD)", color="#1f77b4", edgecolor="black")
+    ax1.bar(x, voice_pds, width, label="Voice P(PD)", color="#ff7f0e", edgecolor="black")
+    ax1.bar(x + width, hw_pds, width, label="Handwriting P(PD)", color="#2ca02c", edgecolor="black")
     ax1.axhline(0.5, color="black", linestyle="--", lw=1.2, label="Boundary (0.5)")
     ax1.set_xticks(x)
     ax1.set_xticklabels(scenarios)
     ax1.set_ylabel("P(PD)")
-    ax1.set_title("A. Modality Probability Comparison", weight="bold")
+    ax1.set_title("A. Tri-Modal Probability Comparison", weight="bold")
     ax1.set_ylim([0, 1.05])
     ax1.legend(loc="upper right", fontsize=8)
     ax1.grid(True, linestyle=":", alpha=0.6)
@@ -250,13 +246,15 @@ def generate_cross_modal_dashboard(results: List[Dict]):
     # Panel B: Conformal Set Sizes
     gait_cs = [r["gait"]["conformal_set_size"] for r in results]
     voice_cs = [r["voice"]["conformal_set_size"] for r in results]
-    ax2.bar(x - width/2, gait_cs, width, label="Gait Set Size", color="#2ca02c", edgecolor="black")
-    ax2.bar(x + width/2, voice_cs, width, label="Voice Set Size", color="#9467bd", edgecolor="black")
+    hw_cs = [r["handwriting"]["conformal_set_size"] for r in results]
+    ax2.bar(x - width, gait_cs, width, label="Gait Set Size", color="#1f77b4", edgecolor="black")
+    ax2.bar(x, voice_cs, width, label="Voice Set Size", color="#ff7f0e", edgecolor="black")
+    ax2.bar(x + width, hw_cs, width, label="Handwriting Set Size", color="#2ca02c", edgecolor="black")
     ax2.set_xticks(x)
     ax2.set_xticklabels(scenarios)
     ax2.set_ylabel("Conformal Set Size |C(X)|")
     ax2.set_yticks([0, 1, 2])
-    ax2.set_title("B. Conformal Set Size Alignment", weight="bold")
+    ax2.set_title("B. Conformal Set Size Alignment Across 3 Modalities", weight="bold")
     ax2.legend(loc="upper right", fontsize=8)
     ax2.grid(True, linestyle=":", alpha=0.6)
 
@@ -274,20 +272,27 @@ def generate_cross_modal_dashboard(results: List[Dict]):
     # Panel D: Cross-Modal Status Breakdown Text Box
     ax4.axis("off")
     table_data = [
-        [r["scenario_title"].split(":")[0], r["cross_modal_status"], r["final_decision"], r["reason"]]
+        [
+            r["scenario_title"].split(":")[0],
+            r["fused_prediction"].replace("Parkinson's Disease", "PD").replace("Healthy Control", "HC"),
+            r["cross_modal_status"],
+            r["final_decision"],
+            r["reason"]
+        ]
         for r in results
     ]
-    col_labels = ["Scenario", "Status", "Decision", "Reason"]
+    col_labels = ["Scenario", "Prediction", "Status", "Decision", "Reason"]
     table = ax4.table(cellText=table_data, colLabels=col_labels, loc="center", cellLoc="center")
     table.auto_set_font_size(False)
     table.set_fontsize(8)
     table.scale(1.1, 1.6)
-    ax4.set_title("D. Decision Policy Summary Matrix", weight="bold")
+    ax4.set_title("D. Decision Policy & Tri-Modal Prediction Matrix", weight="bold")
 
-    plt.suptitle("Parkinson's Disease Decision-Level Cross-Modal Reliability Fusion", fontsize=14, weight="bold", y=0.98)
+    plt.suptitle("Parkinson's Disease Tri-Modal Decision-Level Cross-Modal Reliability Fusion", fontsize=14, weight="bold", y=0.98)
     plt.tight_layout()
     plt.savefig(FIG_DASHBOARD, bbox_inches="tight")
     plt.close()
+    print(f"Generated and saved tri-modal dashboard to: {FIG_DASHBOARD}")
 
 
 if __name__ == "__main__":

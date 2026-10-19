@@ -1,7 +1,12 @@
 {
     "config": {
-        "experiment": "Cross-Modal Reliability Fusion (Gait + Voice)",
-        "paired_subjects_note": "Gait (PhysioNet Ga/Ju/Si) and Voice (MDVR-KCL) cohorts are distinct. Synthetic pairings are used strictly for demonstrating decision-level fusion logic.",
+        "experiment": "Tri-Modal Reliability Fusion (Gait + Voice + Handwriting)",
+        "modalities": [
+            "Gait",
+            "Voice",
+            "Handwriting"
+        ],
+        "paired_subjects_note": "Gait (PhysioNet Ga/Ju/Si), Voice (MDVR-KCL), and Handwriting (NewHandPD) cohorts are distinct. Synthetic pairings evaluate decision-level tri-modal fusion logic.",
         "scenarios_evaluated": 4
     },
     "demonstration_results": [
@@ -36,18 +41,48 @@
                 "reliability_level": "HIGH",
                 "reasons": []
             },
+            "handwriting": {
+                "modality": "Handwriting",
+                "prediction": "Parkinson's Disease",
+                "predicted_label": 1,
+                "p_pd": 0.865,
+                "p_healthy": 0.135,
+                "uncertainty": 0.315,
+                "conformal_set": [
+                    "Parkinson's Disease"
+                ],
+                "conformal_set_size": 1,
+                "reliability": "ACCEPT",
+                "reliability_level": "HIGH",
+                "reasons": []
+            },
+            "active_modalities": [
+                "Gait",
+                "Voice",
+                "Handwriting"
+            ],
+            "num_modalities": 3,
             "prediction_agreement": true,
+            "majority_agreement": true,
+            "fused_prediction": "Parkinson's Disease",
+            "predicted_label": 1,
+            "fused_p_pd": 0.851,
+            "fused_p_healthy": 0.149,
             "conformal_agreement_status": "CONFORMAL_AGREEMENT",
             "cross_modal_status": "CONSISTENT",
             "cross_modal_reliability": "HIGH",
             "final_decision": "ACCEPT",
-            "reason": "CROSS_MODAL_AGREEMENT",
+            "reason": "TRI_MODAL_AGREEMENT",
             "evidence_summary": [
-                "Gait and Voice predictions concur on Parkinson's Disease.",
-                "Both modalities report HIGH reliability.",
-                "Conformal prediction sets concur on [\"Parkinson's Disease\"]."
+                "Gait predicts Parkinson's Disease (P(PD) = 89.0%, uncertainty = 0.350, ACCEPT/HIGH).",
+                "Voice predicts Parkinson's Disease (P(PD) = 79.0%, uncertainty = 0.400, ACCEPT/HIGH).",
+                "Handwriting predicts Parkinson's Disease (P(PD) = 86.5%, uncertainty = 0.315, ACCEPT/HIGH).",
+                "Tri-modal consensus: All 3 modalities agree on Parkinson's Disease (3/3 PD, 0/3 Healthy).",
+                "All 3 modalities report HIGH reliability with matching conformal prediction sets.",
+                "Tri-modal fused decision ACCEPTED for Parkinson's Disease.",
+                "Fused Tri-Modal Probability: P(PD) = 85.1%, P(HC) = 14.9%."
             ],
-            "scenario_title": "CASE 1: STRONG CROSS-MODAL AGREEMENT (PD)"
+            "scenario_title": "CASE 1: STRONG TRI-MODAL AGREEMENT (PD)"
         },
         {
             "gait": {
@@ -67,11 +102,26 @@
             },
             "voice": {
                 "modality": "Voice",
+                "prediction": "Parkinson's Disease",
+                "predicted_label": 1,
+                "p_pd": 0.8,
+                "p_healthy": 0.2,
+                "uncertainty": 0.39,
+                "conformal_set": [
+                    "Parkinson's Disease"
+                ],
+                "conformal_set_size": 1,
+                "reliability": "ACCEPT",
+                "reliability_level": "HIGH",
+                "reasons": []
+            },
+            "handwriting": {
+                "modality": "Handwriting",
                 "prediction": "Healthy Control",
                 "predicted_label": 0,
-                "p_pd": 0.35,
-                "p_healthy": 0.65,
-                "uncertainty": 0.45,
+                "p_pd": 0.22,
+                "p_healthy": 0.78,
+                "uncertainty": 0.34,
                 "conformal_set": [
                     "Healthy Control"
                 ],
@@ -80,18 +130,33 @@
                 "reliability_level": "HIGH",
                 "reasons": []
             },
+            "active_modalities": [
+                "Gait",
+                "Voice",
+                "Handwriting"
+            ],
+            "num_modalities": 3,
             "prediction_agreement": false,
+            "majority_agreement": true,
+            "fused_prediction": "Parkinson's Disease",
+            "predicted_label": 1,
+            "fused_p_pd": 0.6207,
+            "fused_p_healthy": 0.3793,
             "conformal_agreement_status": "CONFORMAL_CONFLICT",
             "cross_modal_status": "MODALITY_CONFLICT",
             "cross_modal_reliability": "LOW",
             "final_decision": "FLAG",
-            "reason": "GAIT_VOICE_CONFLICT",
+            "reason": "MODALITY_DISAGREEMENT_2_VS_1",
             "evidence_summary": [
-                "Gait predicts Parkinson's Disease (P=85.0%), whereas Voice predicts Healthy Control (P=35.0%).",
-                "Direct prediction disagreement detected between modalities.",
-                "Prediction flagged due to cross-modal evidence conflict."
+                "Gait predicts Parkinson's Disease (P(PD) = 85.0%, uncertainty = 0.320, ACCEPT/HIGH).",
+                "Voice predicts Parkinson's Disease (P(PD) = 80.0%, uncertainty = 0.390, ACCEPT/HIGH).",
+                "Handwriting predicts Healthy Control (P(PD) = 22.0%, uncertainty = 0.340, ACCEPT/HIGH).",
+                "Modality disagreement detected: Gait, Voice predict Parkinson's Disease, whereas Handwriting dissents.",
+                "Majority vote points to Parkinson's Disease (2/3 modalities), but conflict requires manual clinical review.",
+                "Automated acceptance rejected due to cross-modal conflict.",
+                "Fused Tri-Modal Probability: P(PD) = 62.1%, P(HC) = 37.9%."
             ],
-            "scenario_title": "CASE 2: DIRECT MODALITY CONFLICT (PD vs Healthy)"
+            "scenario_title": "CASE 2: DIRECT MODALITY CONFLICT (2 vs 1)"
         },
         {
             "gait": {
@@ -113,36 +178,66 @@
                 "modality": "Voice",
                 "prediction": "Parkinson's Disease",
                 "predicted_label": 1,
-                "p_pd": 0.569,
-                "p_healthy": 0.431,
-                "uncertainty": 0.6835,
+                "p_pd": 0.81,
+                "p_healthy": 0.19,
+                "uncertainty": 0.38,
+                "conformal_set": [
+                    "Parkinson's Disease"
+                ],
+                "conformal_set_size": 1,
+                "reliability": "ACCEPT",
+                "reliability_level": "HIGH",
+                "reasons": []
+            },
+            "handwriting": {
+                "modality": "Handwriting",
+                "prediction": "Parkinson's Disease",
+                "predicted_label": 1,
+                "p_pd": 0.545,
+                "p_healthy": 0.455,
+                "uncertainty": 0.582,
                 "conformal_set": [],
                 "conformal_set_size": 0,
                 "reliability": "FLAG",
-                "reliability_level": "LOW",
+                "reliability_level": "MEDIUM",
                 "reasons": []
             },
+            "active_modalities": [
+                "Gait",
+                "Voice",
+                "Handwriting"
+            ],
+            "num_modalities": 3,
             "prediction_agreement": true,
+            "majority_agreement": true,
+            "fused_prediction": "Parkinson's Disease",
+            "predicted_label": 1,
+            "fused_p_pd": 0.7776,
+            "fused_p_healthy": 0.2224,
             "conformal_agreement_status": "UNCERTAIN_CONFORMAL_EVIDENCE",
             "cross_modal_status": "PARTIAL_SUPPORT",
             "cross_modal_reliability": "MEDIUM",
             "final_decision": "FLAG",
-            "reason": "ONE_MODALITY_UNCERTAIN",
+            "reason": "ONE_OR_MORE_MODALITIES_UNCERTAIN",
             "evidence_summary": [
-                "Gait and Voice predictions concur on Parkinson's Disease.",
-                "Voice reliability is LOW (Flagged).",
-                "Conformal status: UNCERTAIN_CONFORMAL_EVIDENCE."
+                "Gait predicts Parkinson's Disease (P(PD) = 88.0%, uncertainty = 0.300, ACCEPT/HIGH).",
+                "Voice predicts Parkinson's Disease (P(PD) = 81.0%, uncertainty = 0.380, ACCEPT/HIGH).",
+                "Handwriting predicts Parkinson's Disease (P(PD) = 54.5%, uncertainty = 0.582, FLAG/MEDIUM).",
+                "Tri-modal consensus: All 3 modalities agree on Parkinson's Disease (3/3 PD, 0/3 Healthy).",
+                "All 3 modalities predict Parkinson's Disease, but one or more report caution/uncertainty.",
+                "Conformal status: UNCERTAIN_CONFORMAL_EVIDENCE. Flagged for clinical verification.",
+                "Fused Tri-Modal Probability: P(PD) = 77.8%, P(HC) = 22.2%."
             ],
-            "scenario_title": "CASE 3: AGREEMENT BUT VOICE UNCERTAIN (FLAGGED)"
+            "scenario_title": "CASE 3: AGREEMENT BUT HANDWRITING UNCERTAIN"
         },
         {
             "gait": {
                 "modality": "Gait",
                 "prediction": "Healthy Control",
                 "predicted_label": 0,
-                "p_pd": 0.15,
-                "p_healthy": 0.85,
-                "uncertainty": 0.25,
+                "p_pd": 0.11,
+                "p_healthy": 0.89,
+                "uncertainty": 0.28,
                 "conformal_set": [
                     "Healthy Control"
                 ],
@@ -155,9 +250,9 @@
                 "modality": "Voice",
                 "prediction": "Healthy Control",
                 "predicted_label": 0,
-                "p_pd": 0.18,
-                "p_healthy": 0.82,
-                "uncertainty": 0.28,
+                "p_pd": 0.14,
+                "p_healthy": 0.86,
+                "uncertainty": 0.33,
                 "conformal_set": [
                     "Healthy Control"
                 ],
@@ -166,18 +261,48 @@
                 "reliability_level": "HIGH",
                 "reasons": []
             },
+            "handwriting": {
+                "modality": "Handwriting",
+                "prediction": "Healthy Control",
+                "predicted_label": 0,
+                "p_pd": 0.135,
+                "p_healthy": 0.865,
+                "uncertainty": 0.29,
+                "conformal_set": [
+                    "Healthy Control"
+                ],
+                "conformal_set_size": 1,
+                "reliability": "ACCEPT",
+                "reliability_level": "HIGH",
+                "reasons": []
+            },
+            "active_modalities": [
+                "Gait",
+                "Voice",
+                "Handwriting"
+            ],
+            "num_modalities": 3,
             "prediction_agreement": true,
+            "majority_agreement": true,
+            "fused_prediction": "Healthy Control",
+            "predicted_label": 0,
+            "fused_p_pd": 0.1277,
+            "fused_p_healthy": 0.8723,
             "conformal_agreement_status": "CONFORMAL_AGREEMENT",
             "cross_modal_status": "CONSISTENT",
             "cross_modal_reliability": "HIGH",
             "final_decision": "ACCEPT",
-            "reason": "CROSS_MODAL_AGREEMENT",
+            "reason": "TRI_MODAL_AGREEMENT",
             "evidence_summary": [
-                "Gait and Voice predictions concur on Healthy Control.",
-                "Both modalities report HIGH reliability.",
-                "Conformal prediction sets concur on ['Healthy Control']."
+                "Gait predicts Healthy Control (P(PD) = 11.0%, uncertainty = 0.280, ACCEPT/HIGH).",
+                "Voice predicts Healthy Control (P(PD) = 14.0%, uncertainty = 0.330, ACCEPT/HIGH).",
+                "Handwriting predicts Healthy Control (P(PD) = 13.5%, uncertainty = 0.290, ACCEPT/HIGH).",
+                "Tri-modal consensus: All 3 modalities agree on Healthy Control (0/3 PD, 3/3 Healthy).",
+                "All 3 modalities report HIGH reliability with matching conformal prediction sets.",
+                "Tri-modal fused decision ACCEPTED for Healthy Control.",
+                "Fused Tri-Modal Probability: P(PD) = 12.8%, P(HC) = 87.2%."
             ],
-            "scenario_title": "CASE 4: STRONG CROSS-MODAL AGREEMENT (Healthy)"
+            "scenario_title": "CASE 4: STRONG TRI-MODAL AGREEMENT (Healthy)"
         }
     ]
 }

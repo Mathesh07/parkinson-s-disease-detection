@@ -1,9 +1,9 @@
 """Main Analyzer View Component for Streamlit Demo App.
 
-Renders the Parkinson's Reliability Analyzer dashboard:
-    - Input controls (Audio/Gait file uploaders & Pre-set Demo Scenarios)
-    - Modality evidence cards (Gait & Voice)
-    - Visually dominant Cross-Modal Decision Banner (ACCEPT vs FLAG)
+Renders the Tri-Modal Parkinson's Reliability Analyzer dashboard:
+    - Input controls (Gait, Voice WAV, and Handwriting drawing uploaders & Pre-set Demo Scenarios)
+    - Modality evidence cards (Gait, Voice, and Handwriting)
+    - Visually dominant Tri-Modal Decision Banner (Final Prediction, Consensus, ACCEPT vs FLAG)
     - Transparent evidence explanation boxes
     - Expandable evidence detail inspection panels
 """
@@ -27,11 +27,11 @@ from cross_modal_reliability import CrossModalReliabilityEngine
 
 
 def load_demo_scenarios() -> Dict[str, Dict]:
-    """Load pre-set demonstration scenarios from Phase 9 outputs or deterministic definitions."""
+    """Load pre-set demonstration scenarios spanning all three modalities (Gait, Voice, Handwriting)."""
     return {
         "Scenario 1: Strong Agreement (ACCEPT)": {
-            "title": "Scenario 1: Strong Cross-Modal Agreement",
-            "desc": "Both Gait and Voice independently predict Parkinson's Disease with high probability, strong ensemble agreement, and matching singleton conformal prediction sets.",
+            "title": "Scenario 1: Strong Tri-Modal Agreement (All 3 Predict PD)",
+            "desc": "Gait, Voice, and Handwriting all independently predict Parkinson's Disease with high probability, low uncertainty, and matching singleton conformal prediction sets.",
             "gait": {
                 "prediction": "Parkinson's Disease", "predicted_label": 1,
                 "p_pd": 0.890, "p_healthy": 0.110, "uncertainty": 0.350,
@@ -47,11 +47,19 @@ def load_demo_scenarios() -> Dict[str, Dict]:
                 "reliability": "ACCEPT", "reliability_level": "HIGH",
                 "reliability_reasons": ["CONSISTENT_SINGLETON_PREDICTION"],
                 "ensemble_agreement": "5/5 PD, 0/5 Healthy", "variance": 0.008
+            },
+            "handwriting": {
+                "prediction": "Parkinson's Disease", "predicted_label": 1,
+                "p_pd": 0.865, "p_healthy": 0.135, "uncertainty": 0.315,
+                "conformal_prediction_set": ["Parkinson's Disease"],
+                "reliability": "ACCEPT", "reliability_level": "HIGH",
+                "reliability_reasons": ["CONSISTENT_SINGLETON_PREDICTION"],
+                "evidence": [0.15, 1.85], "model": "ViT (Evidential Head)"
             }
         },
         "Scenario 2: Modality Conflict (FLAG)": {
-            "title": "Scenario 2: Direct Modality Conflict (Gait PD vs Voice Healthy)",
-            "desc": "Gait predicts Parkinson's Disease (85.0%), whereas Voice predicts Healthy Control (65.0%). The system explicitly flags the conflict rather than silently averaging conflicting probabilities.",
+            "title": "Scenario 2: Tri-Modal Conflict (Gait & Voice PD vs Handwriting Healthy)",
+            "desc": "Gait (85%) and Voice (80%) predict Parkinson's Disease, but Handwriting predicts Healthy Control (78%). The system flags the 2 vs 1 conflict rather than silently masking disagreement.",
             "gait": {
                 "prediction": "Parkinson's Disease", "predicted_label": 1,
                 "p_pd": 0.850, "p_healthy": 0.150, "uncertainty": 0.320,
@@ -61,17 +69,25 @@ def load_demo_scenarios() -> Dict[str, Dict]:
                 "ensemble_agreement": "5/5 PD, 0/5 Healthy", "variance": 0.006
             },
             "voice": {
+                "prediction": "Parkinson's Disease", "predicted_label": 1,
+                "p_pd": 0.800, "p_healthy": 0.200, "uncertainty": 0.390,
+                "conformal_prediction_set": ["Parkinson's Disease"],
+                "reliability": "ACCEPT", "reliability_level": "HIGH",
+                "reliability_reasons": ["CONSISTENT_SINGLETON_PREDICTION"],
+                "ensemble_agreement": "4/5 PD, 1/5 Healthy", "variance": 0.010
+            },
+            "handwriting": {
                 "prediction": "Healthy Control", "predicted_label": 0,
-                "p_pd": 0.350, "p_healthy": 0.650, "uncertainty": 0.450,
+                "p_pd": 0.220, "p_healthy": 0.780, "uncertainty": 0.340,
                 "conformal_prediction_set": ["Healthy Control"],
                 "reliability": "ACCEPT", "reliability_level": "HIGH",
                 "reliability_reasons": ["CONSISTENT_SINGLETON_PREDICTION"],
-                "ensemble_agreement": "4/5 Healthy, 1/5 PD", "variance": 0.012
+                "evidence": [2.40, 0.18], "model": "ViT (Evidential Head)"
             }
         },
         "Scenario 3: One Modality Uncertain (FLAG)": {
-            "title": "Scenario 3: Agreement but Voice Modality Flagged",
-            "desc": "Both modalities predict Parkinson's Disease, but Voice exhibits high uncertainty, borderline probability (56.9%), and an empty conformal prediction set.",
+            "title": "Scenario 3: Unanimous Prediction but Handwriting Modality Flagged",
+            "desc": "All three modalities predict Parkinson's Disease, but Handwriting exhibits elevated Dirichlet uncertainty (0.582), borderline probability (54.5%), and an empty conformal set.",
             "gait": {
                 "prediction": "Parkinson's Disease", "predicted_label": 1,
                 "p_pd": 0.880, "p_healthy": 0.120, "uncertainty": 0.300,
@@ -82,35 +98,77 @@ def load_demo_scenarios() -> Dict[str, Dict]:
             },
             "voice": {
                 "prediction": "Parkinson's Disease", "predicted_label": 1,
-                "p_pd": 0.569, "p_healthy": 0.431, "uncertainty": 0.6835,
+                "p_pd": 0.810, "p_healthy": 0.190, "uncertainty": 0.380,
+                "conformal_prediction_set": ["Parkinson's Disease"],
+                "reliability": "ACCEPT", "reliability_level": "HIGH",
+                "reliability_reasons": ["CONSISTENT_SINGLETON_PREDICTION"],
+                "ensemble_agreement": "5/5 PD, 0/5 Healthy", "variance": 0.007
+            },
+            "handwriting": {
+                "prediction": "Parkinson's Disease", "predicted_label": 1,
+                "p_pd": 0.545, "p_healthy": 0.455, "uncertainty": 0.582,
                 "conformal_prediction_set": [],
-                "reliability": "FLAG", "reliability_level": "LOW",
-                "reliability_reasons": ["EMPTY_CONFORMAL_SET", "HIGH_UNCERTAINTY", "BORDERLINE_PROBABILITY"],
-                "ensemble_agreement": "4/5 PD, 1/5 Healthy", "variance": 0.01304
+                "reliability": "FLAG", "reliability_level": "MEDIUM",
+                "reliability_reasons": ["EMPTY_CONFORMAL_SET", "HIGH_EVIDENTIAL_UNCERTAINTY", "BORDERLINE_PROBABILITY"],
+                "evidence": [0.42, 0.58], "model": "ViT (Evidential Head)"
+            }
+        },
+        "Scenario 4: Strong Healthy Agreement (ACCEPT)": {
+            "title": "Scenario 4: Strong Tri-Modal Healthy Agreement",
+            "desc": "All 3 modalities independently predict Healthy Control with high probability and singleton conformal sets.",
+            "gait": {
+                "prediction": "Healthy Control", "predicted_label": 0,
+                "p_pd": 0.110, "p_healthy": 0.890, "uncertainty": 0.280,
+                "conformal_prediction_set": ["Healthy Control"],
+                "reliability": "ACCEPT", "reliability_level": "HIGH",
+                "reliability_reasons": ["CONSISTENT_SINGLETON_PREDICTION"],
+                "ensemble_agreement": "5/5 Healthy, 0/5 PD", "variance": 0.003
+            },
+            "voice": {
+                "prediction": "Healthy Control", "predicted_label": 0,
+                "p_pd": 0.140, "p_healthy": 0.860, "uncertainty": 0.330,
+                "conformal_prediction_set": ["Healthy Control"],
+                "reliability": "ACCEPT", "reliability_level": "HIGH",
+                "reliability_reasons": ["CONSISTENT_SINGLETON_PREDICTION"],
+                "ensemble_agreement": "5/5 Healthy, 0/5 PD", "variance": 0.005
+            },
+            "handwriting": {
+                "prediction": "Healthy Control", "predicted_label": 0,
+                "p_pd": 0.135, "p_healthy": 0.865, "uncertainty": 0.290,
+                "conformal_prediction_set": ["Healthy Control"],
+                "reliability": "ACCEPT", "reliability_level": "HIGH",
+                "reliability_reasons": ["CONSISTENT_SINGLETON_PREDICTION"],
+                "evidence": [3.10, 0.12], "model": "ViT (Evidential Head)"
             }
         }
     }
 
 
 def render_analyzer_view():
-    """Render the main Parkinson's Reliability Analyzer page."""
-    st.markdown("<h1 style='text-align: center; color: #f0f2f6;'>PARKINSON'S RELIABILITY ANALYZER</h1>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align: center; color: #8b949e; font-size: 1.15rem; font-style: italic; margin-bottom: 2rem;'>\"Prediction is only the beginning. Can the model's prediction be trusted?\"</p>", unsafe_allow_html=True)
+    """Render the main Tri-Modal Parkinson's Reliability Analyzer page."""
+    st.markdown("<h1 style='text-align: center; color: #f0f2f6;'>TRI-MODAL PARKINSON'S RELIABILITY ANALYZER</h1>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center; color: #8b949e; font-size: 1.15rem; font-style: italic; margin-bottom: 2rem;'>\"Unified Decision-Level Evidence Synthesis Across Gait, Voice, and Handwriting\"</p>", unsafe_allow_html=True)
 
-    # 1. INPUT AREA
-    st.markdown("### 📥 Input & Demo Scenarios")
+    # 1. INPUT AREA (3 Modalities)
+    st.markdown("### 📥 Multimodal Input Controls")
     
-    col_input1, col_input2 = st.columns(2)
+    col_input1, col_input2, col_input3 = st.columns(3)
     with col_input1:
-        uploaded_gait = st.file_uploader("Upload Gait Data (.csv / .txt)", type=["csv", "txt"], key="gait_uploader")
+        uploaded_gait = st.file_uploader("🏃 Gait Data (.csv / .txt)", type=["csv", "txt"], key="gait_uploader")
         if uploaded_gait:
-            st.success(f"Loaded Gait file: `{uploaded_gait.name}`")
+            st.success(f"Gait: `{uploaded_gait.name}`")
 
     with col_input2:
-        uploaded_voice = st.file_uploader("Upload Voice Audio (.wav)", type=["wav"], key="voice_uploader")
+        uploaded_voice = st.file_uploader("🎙️ Voice Audio (.wav)", type=["wav"], key="voice_uploader")
         if uploaded_voice:
             st.audio(uploaded_voice, format="audio/wav")
-            st.success(f"Loaded Audio file: `{uploaded_voice.name}`")
+            st.success(f"Audio: `{uploaded_voice.name}`")
+
+    with col_input3:
+        uploaded_hw = st.file_uploader("✍️ Handwriting (.png / .jpg)", type=["png", "jpg", "jpeg"], key="hw_uploader")
+        if uploaded_hw:
+            st.image(uploaded_hw, width=150, caption=f"Drawing: {uploaded_hw.name}")
+            st.success(f"Drawing: `{uploaded_hw.name}`")
 
     # Pre-set Demo Scenarios
     scenarios = load_demo_scenarios()
@@ -121,26 +179,32 @@ def render_analyzer_view():
     )
     
     current_scenario = scenarios[selected_scenario_key]
-    st.info(f"**{current_scenario['title']}** — {current_scenario['desc']}\n\n*Note: Demonstration scenarios use frozen Phase 8 & 9 research outputs to guarantee panel presentation stability on any hardware.*")
+    st.info(f"**{current_scenario['title']}** — {current_scenario['desc']}\n\n*Note: Demonstration scenarios use frozen research outputs across all 3 modalities to guarantee presentation stability.*")
 
     gait_data = current_scenario["gait"]
     voice_data = current_scenario["voice"]
+    hw_data = current_scenario["handwriting"]
 
-    # 2. RUN CROSS-MODAL FUSION ENGINE
+    # 2. RUN TRI-MODAL CROSS-MODAL FUSION ENGINE
     engine = CrossModalReliabilityEngine()
-    fusion_result = engine.fuse_modalities(gait_data, voice_data)
+    fusion_result = engine.fuse_modalities(
+        gait_output=gait_data,
+        voice_output=voice_data,
+        handwriting_output=hw_data
+    )
 
     st.markdown("---")
 
-    # 3. MODALITY CARDS
-    st.markdown("### 🔬 Modality Evidence Cards")
-    col_gait, col_voice = st.columns(2)
+    # 3. MODALITY EVIDENCE CARDS (3 Columns)
+    st.markdown("### 🔬 Unimodal Evidence Cards")
+    col_gait, col_voice, col_hw = st.columns(3)
 
     with col_gait:
         st.markdown("<div style='background-color: #161b22; padding: 1.25rem; border-radius: 8px; border: 1px solid #30363d;'>", unsafe_allow_html=True)
         st.markdown("<h4 style='color: #58a6ff; margin-top:0;'>🏃 GAIT MODALITY</h4>", unsafe_allow_html=True)
+        st.write(f"**Model:** `1D-CNN + BiLSTM (M=5)`")
         st.write(f"**Prediction:** {gait_data['prediction']}")
-        st.write(f"**P(PD):** `{gait_data['p_pd']*100:.1f}%` | **P(Healthy):** `{gait_data['p_healthy']*100:.1f}%`")
+        st.write(f"**P(PD):** `{gait_data['p_pd']*100:.1f}%` | **P(HC):** `{gait_data['p_healthy']*100:.1f}%`")
         st.write(f"**Ensemble Agreement:** `{gait_data.get('ensemble_agreement', '5/5')}`")
         st.write(f"**Uncertainty Score:** `{gait_data['uncertainty']:.3f}`")
         
@@ -156,9 +220,10 @@ def render_analyzer_view():
     with col_voice:
         st.markdown("<div style='background-color: #161b22; padding: 1.25rem; border-radius: 8px; border: 1px solid #30363d;'>", unsafe_allow_html=True)
         st.markdown("<h4 style='color: #d2a8ff; margin-top:0;'>🎙️ VOICE MODALITY</h4>", unsafe_allow_html=True)
+        st.write(f"**Model:** `Wav2Vec2 Ensemble (M=5)`")
         st.write(f"**Prediction:** {voice_data['prediction']}")
-        st.write(f"**P(PD):** `{voice_data['p_pd']*100:.1f}%` | **P(Healthy):** `{voice_data['p_healthy']*100:.1f}%`")
-        st.write(f"**Ensemble Agreement:** `{voice_data.get('ensemble_agreement', '4/5 PD, 1/5 Healthy')}`")
+        st.write(f"**P(PD):** `{voice_data['p_pd']*100:.1f}%` | **P(HC):** `{voice_data['p_healthy']*100:.1f}%`")
+        st.write(f"**Ensemble Agreement:** `{voice_data.get('ensemble_agreement', '5/5')}`")
         st.write(f"**Predictive Entropy:** `{voice_data['uncertainty']:.3f}`")
         
         v_c_set_str = "{" + ", ".join(voice_data['conformal_prediction_set']) + "}" if voice_data['conformal_prediction_set'] else "{}"
@@ -170,15 +235,36 @@ def render_analyzer_view():
         st.write(f"**Reason:** `{', '.join(voice_data['reliability_reasons'])}`")
         st.markdown("</div>", unsafe_allow_html=True)
 
+    with col_hw:
+        st.markdown("<div style='background-color: #161b22; padding: 1.25rem; border-radius: 8px; border: 1px solid #30363d;'>", unsafe_allow_html=True)
+        st.markdown("<h4 style='color: #7ee787; margin-top:0;'>✍️ HANDWRITING MODALITY</h4>", unsafe_allow_html=True)
+        st.write(f"**Model:** `Vision Transformer (ViT EDL)`")
+        st.write(f"**Prediction:** {hw_data['prediction']}")
+        st.write(f"**P(PD):** `{hw_data['p_pd']*100:.1f}%` | **P(HC):** `{hw_data['p_healthy']*100:.1f}%`")
+        st.write(f"**Evidence Head:** `{hw_data.get('evidence', 'N/A')}`")
+        st.write(f"**Dirichlet Vacuity:** `{hw_data['uncertainty']:.3f}`")
+        
+        hw_c_set_str = "{" + ", ".join(hw_data['conformal_prediction_set']) + "}" if hw_data['conformal_prediction_set'] else "{}"
+        st.write(f"**Conformal Set:** `{hw_c_set_str}`")
+
+        hw_rel_status = hw_data['reliability']
+        hw_rel_color = "#2ea043" if hw_rel_status == "ACCEPT" else "#da3633"
+        st.markdown(f"**Reliability:** <span style='color: {hw_rel_color}; font-weight: bold;'>[{hw_rel_status}] ({hw_data['reliability_level']})</span>", unsafe_allow_html=True)
+        st.write(f"**Reason:** `{', '.join(hw_data['reliability_reasons'])}`")
+        st.markdown("</div>", unsafe_allow_html=True)
+
     st.markdown("---")
 
-    # 4. VISUALLY DOMINANT FINAL CROSS-MODAL DECISION BANNER
-    st.markdown("### ⚖️ Cross-Modal Evidence & Final Decision")
+    # 4. VISUALLY DOMINANT FINAL TRI-MODAL DECISION BANNER
+    st.markdown("### ⚖️ Tri-Modal Evidence Synthesis & Final Prediction")
     
     decision = fusion_result["final_decision"]
     status = fusion_result["cross_modal_status"]
     reason = fusion_result["reason"]
     level = fusion_result["cross_modal_reliability"]
+    fused_pred = fusion_result["fused_prediction"]
+    fused_p_pd = fusion_result["fused_p_pd"]
+    fused_p_hc = fusion_result["fused_p_healthy"]
 
     banner_bg = "#0d1117"
     banner_border = "#2ea043" if decision == "ACCEPT" else "#da3633"
@@ -187,24 +273,27 @@ def render_analyzer_view():
 
     st.markdown(f"""
     <div style='background-color: {banner_bg}; padding: 1.75rem; border-radius: 12px; border: 3px solid {banner_border}; text-align: center;'>
-        <h3 style='margin-top: 0; color: #8b949e;'>CROSS-MODAL EVIDENCE SYNTHESIS</h3>
+        <h3 style='margin-top: 0; color: #8b949e;'>TRI-MODAL EVIDENCE SYNTHESIS</h3>
         <div style='display: flex; justify-content: space-around; margin: 1.25rem 0;'>
             <div>
-                <span style='color: #8b949e; font-size: 0.9rem;'>Prediction Agreement</span><br>
-                <span style='font-size: 1.2rem; font-weight: bold;'>{"YES" if fusion_result["prediction_agreement"] else "NO"}</span>
+                <span style='color: #8b949e; font-size: 0.9rem;'>Tri-Modal Consensus</span><br>
+                <span style='font-size: 1.2rem; font-weight: bold;'>{"UNANIMOUS (3/3)" if fusion_result["prediction_agreement"] else "CONFLICT (2 vs 1)"}</span>
             </div>
             <div>
                 <span style='color: #8b949e; font-size: 0.9rem;'>Conformal Status</span><br>
                 <span style='font-size: 1.1rem; font-weight: bold;'>{fusion_result["conformal_agreement_status"]}</span>
             </div>
             <div>
-                <span style='color: #8b949e; font-size: 0.9rem;'>Evidence Status</span><br>
+                <span style='color: #8b949e; font-size: 0.9rem;'>Cross-Modal Status</span><br>
                 <span style='font-size: 1.2rem; font-weight: bold;'>{badge_icon} {status}</span>
             </div>
         </div>
         <hr style='border-color: #30363d; margin: 1rem 0;'>
         <div style='margin-top: 0.75rem;'>
-            <span style='color: #8b949e; font-size: 1.1rem;'>FINAL SYSTEM DECISION:</span><br>
+            <span style='color: #8b949e; font-size: 1.05rem;'>FINAL TRI-MODAL PREDICTION (BASED ON ALL 3 MODALITIES):</span><br>
+            <span style='font-size: 2.2rem; font-weight: 800; color: #58a6ff;'>{fused_pred}</span><br>
+            <span style='color: #8b949e; font-size: 1.0rem;'>Fused P(PD): <b>{fused_p_pd*100:.1f}%</b> | Fused P(HC): <b>{fused_p_hc*100:.1f}%</b></span><br><br>
+            <span style='color: #8b949e; font-size: 1.1rem;'>SYSTEM RELIABILITY DECISION:</span><br>
             <span style='font-size: 2.8rem; font-weight: 900; color: {decision_color}; letter-spacing: 2px;'>[{decision}]</span><br>
             <span style='font-size: 1.1rem; color: #c9d1d9; font-weight: 600;'>Reliability Level: {level} | Policy Reason: {reason}</span>
         </div>
@@ -216,25 +305,28 @@ def render_analyzer_view():
     # Why ACCEPT / Why FLAG explanation box
     if decision == "ACCEPT":
         st.success(
-            "**WHY ACCEPT?**\n\n"
-            "✓ Both Gait and Voice modalities independently support the same class prediction.\n\n"
-            "✓ Conformal prediction sets concur on a single class.\n\n"
-            "✓ Both modalities report HIGH reliability with low predictive uncertainty."
+            f"**WHY ACCEPT? (Final Prediction: {fused_pred})**\n\n"
+            "✓ All 3 modalities (Gait, Voice, and Handwriting) independently support this prediction.\n\n"
+            "✓ Split Conformal prediction sets concur across modalities.\n\n"
+            "✓ All 3 modalities report HIGH reliability with low predictive uncertainty."
         )
     else:
         st.error(
-            "**WHY FLAG?**\n\n"
+            f"**WHY FLAG? (Majority Vote: {fused_pred})**\n\n"
             f"⚠ **Primary Reason:** `{reason}`\n\n"
             + "\n\n".join([f"• {item}" for item in fusion_result["evidence_summary"]]) +
-            "\n\n*The reliability engine explicitly flags the decision rather than forcing an unsupported diagnosis.*"
+            "\n\n*The reliability engine explicitly flags the decision for clinical verification rather than forcing an unsupported diagnosis.*"
         )
 
-    # 5. EXPANDABLE EVIDENCE INSPECTION
-    with st.expander("🔍 Inspect Gait Evidence Details"):
-        st.json(gait_data)
-
-    with st.expander("🔍 Inspect Voice Evidence Details"):
-        st.json(voice_data)
-
-    with st.expander("🔍 Inspect Cross-Modal Decision Logic Details"):
-        st.json(fusion_result)
+    # 5. EXPANDABLE EVIDENCE INSPECTION (All 3 Modalities)
+    col_exp1, col_exp2 = st.columns(2)
+    with col_exp1:
+        with st.expander("🔍 Inspect Gait Evidence Details"):
+            st.json(gait_data)
+        with st.expander("🔍 Inspect Voice Evidence Details"):
+            st.json(voice_data)
+    with col_exp2:
+        with st.expander("🔍 Inspect Handwriting Evidence Details"):
+            st.json(hw_data)
+        with st.expander("🔍 Inspect Tri-Modal Fusion Logic Details"):
+            st.json(fusion_result)

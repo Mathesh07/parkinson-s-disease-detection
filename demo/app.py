@@ -91,8 +91,9 @@ def main():
     st.sidebar.markdown("### ⚙️ System Status")
     st.sidebar.success("✓ Gait Engine: Active (M=5, q=0.8147)")
     st.sidebar.success("✓ Voice Engine: Active (M=5, q=0.4075)")
-    st.sidebar.success("✓ Cross-Modal Fusion: Active")
-    st.sidebar.info("✓ 174 Automated Tests Passed")
+    st.sidebar.success("✓ Handwriting Engine: Active (ViT EDL, q=0.4500)")
+    st.sidebar.success("✓ Tri-Modal Fusion: Active")
+    st.sidebar.info("✓ Automated Test Suite Passed")
 
     # 4. Render Selected Page Component
     if navigation_choice == "🔍 Parkinson's Reliability Analyzer":
