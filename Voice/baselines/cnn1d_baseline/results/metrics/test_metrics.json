@@ -1,0 +1,80 @@
+{
+    "model_name": "Voice1DCNN_RawWaveform_Baseline",
+    "description": "Conventional 1D CNN on 16 kHz raw waveforms without pretrained transformers or STFT",
+    "subject_level": {
+        "accuracy": 0.6666666666666666,
+        "balanced_accuracy": 0.6666666666666666,
+        "precision": 0.6,
+        "recall_sensitivity": 1.0,
+        "specificity": 0.3333333333333333,
+        "f1_score": 0.75,
+        "roc_auc": 1.0,
+        "brier_score": 0.14407755314039866,
+        "negative_log_likelihood": 0.4481808492522821,
+        "tp": 3,
+        "tn": 1,
+        "fp": 2,
+        "fn": 0,
+        "confidence_intervals_95": {
+            "accuracy": [
+                0.3333333333333333,
+                1.0
+            ],
+            "f1_score": [
+                0.3333333333333333,
+                1.0
+            ]
+        }
+    },
+    "recording_level": {
+        "accuracy": 0.75,
+        "balanced_accuracy": 0.75,
+        "precision": 0.6666666666666666,
+        "recall_sensitivity": 1.0,
+        "specificity": 0.5,
+        "f1_score": 0.8,
+        "roc_auc": 0.9444444444444444,
+        "brier_score": 0.15036246942585005,
+        "negative_log_likelihood": 0.46132717441474264,
+        "tp": 6,
+        "tn": 3,
+        "fp": 3,
+        "fn": 0
+    },
+    "chunk_level": {
+        "accuracy": 0.7171453437771975,
+        "balanced_accuracy": 0.7178260289668803,
+        "precision": 0.6958677685950413,
+        "recall_sensitivity": 0.7491103202846975,
+        "specificity": 0.686541737649063,
+        "f1_score": 0.7215081405312768,
+        "roc_auc": 0.8212456122269577,
+        "brier_score": 0.194411699084246,
+        "negative_log_likelihood": 0.6309518117043768,
+        "tp": 421,
+        "tn": 403,
+        "fp": 184,
+        "fn": 141
+    },
+    "entropy_uncertainty_stats": {
+        "mean_predictive_entropy_all": 0.5317783376882788,
+        "mean_predictive_entropy_correct": 0.43950356939851093,
+        "mean_predictive_entropy_incorrect": 0.7163278742678143,
+        "uncertainty_type": "binary_predictive_entropy_proxy"
+    },
+    "test_subjects": [
+        "ID04",
+        "ID10",
+        "ID13",
+        "ID23",
+        "ID29",
+        "ID35"
+    ],
+    "test_sample_size": {
+        "total_subjects": 6,
+        "hc_subjects": 3,
+        "pd_subjects": 3,
+        "recordings": 12,
+        "chunks": 1149
+    }
+}

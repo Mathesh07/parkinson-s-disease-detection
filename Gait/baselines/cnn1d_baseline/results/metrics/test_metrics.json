@@ -1,0 +1,155 @@
+{
+    "model_name": "Gait1DCNN_Baseline",
+    "description": "Conventional 1D CNN without LSTM, BiLSTM, or Evidential Head",
+    "input_representation": "Raw VGRF 16-channel time series (500 time steps, 16 sensors)",
+    "subject_level": {
+        "accuracy": 0.68,
+        "balanced_accuracy": 0.6850649350649352,
+        "precision": 0.75,
+        "recall_sensitivity": 0.6428571428571429,
+        "specificity": 0.7272727272727273,
+        "f1_score": 0.6923076923076923,
+        "roc_auc": 0.6818181818181819,
+        "brier_score": 0.2592401241185081,
+        "negative_log_likelihood": 1.2645403405199518,
+        "tp": 9,
+        "tn": 8,
+        "fp": 3,
+        "fn": 5,
+        "confidence_intervals_95": {
+            "accuracy": [
+                0.48,
+                0.88
+            ],
+            "balanced_accuracy": [
+                0.5127403846153846,
+                0.875
+            ],
+            "f1_score": [
+                0.4542929292929293,
+                0.8888888888888888
+            ],
+            "roc_auc": [
+                0.46145833333333325,
+                0.9091066919191919
+            ]
+        }
+    },
+    "recording_level": {
+        "accuracy": 0.675,
+        "balanced_accuracy": 0.6733333333333333,
+        "precision": 0.7727272727272727,
+        "recall_sensitivity": 0.68,
+        "specificity": 0.6666666666666666,
+        "f1_score": 0.723404255319149,
+        "roc_auc": 0.6586666666666667,
+        "brier_score": 0.2763320435890032,
+        "negative_log_likelihood": 1.6166085142809272,
+        "tp": 17,
+        "tn": 10,
+        "fp": 5,
+        "fn": 8
+    },
+    "window_level": {
+        "accuracy": 0.6893048128342246,
+        "balanced_accuracy": 0.6894370949654138,
+        "precision": 0.797676669893514,
+        "recall_sensitivity": 0.6889632107023411,
+        "specificity": 0.6899109792284867,
+        "f1_score": 0.7393449977568416,
+        "roc_auc": 0.6790904151325386,
+        "brier_score": 0.2843863963830613,
+        "negative_log_likelihood": 1.7801110788162613,
+        "tp": 824,
+        "tn": 465,
+        "fp": 209,
+        "fn": 372
+    },
+    "entropy_uncertainty_stats": {
+        "mean_predictive_entropy_all": 0.2598554573730154,
+        "mean_predictive_entropy_correct": 0.22374556636220091,
+        "mean_predictive_entropy_incorrect": 0.3365889757709961,
+        "mean_predictive_entropy_HC": 0.27868111876343077,
+        "mean_predictive_entropy_PD": 0.24506386628054616,
+        "uncertainty_type": "binary_predictive_entropy_proxy"
+    },
+    "study_breakdown": {
+        "Ga": {
+            "accuracy": 0.75,
+            "balanced_accuracy": 0.7333333333333334,
+            "precision": 0.8,
+            "recall_sensitivity": 0.8,
+            "specificity": 0.6666666666666666,
+            "f1_score": 0.8,
+            "roc_auc": 0.6000000000000001,
+            "brier_score": 0.253254702279214,
+            "negative_log_likelihood": 1.9395980390652388,
+            "tp": 4,
+            "tn": 2,
+            "fp": 1,
+            "fn": 1
+        },
+        "Ju": {
+            "accuracy": 0.8333333333333334,
+            "balanced_accuracy": 0.8333333333333333,
+            "precision": 0.75,
+            "recall_sensitivity": 1.0,
+            "specificity": 0.6666666666666666,
+            "f1_score": 0.8571428571428571,
+            "roc_auc": 0.7777777777777779,
+            "brier_score": 0.18227161294519445,
+            "negative_log_likelihood": 0.5605991026010662,
+            "tp": 3,
+            "tn": 2,
+            "fp": 1,
+            "fn": 0
+        },
+        "Si": {
+            "accuracy": 0.5454545454545454,
+            "balanced_accuracy": 0.5666666666666667,
+            "precision": 0.6666666666666666,
+            "recall_sensitivity": 0.3333333333333333,
+            "specificity": 0.8,
+            "f1_score": 0.4444444444444444,
+            "roc_auc": 0.6333333333333333,
+            "brier_score": 0.30557598245980216,
+            "negative_log_likelihood": 1.1575572349882257,
+            "tp": 2,
+            "tn": 4,
+            "fp": 1,
+            "fn": 4
+        }
+    },
+    "test_subjects": [
+        "GaCo02",
+        "GaCo03",
+        "GaCo15",
+        "GaPt13",
+        "GaPt19",
+        "GaPt28",
+        "GaPt30",
+        "GaPt33",
+        "JuCo03",
+        "JuCo04",
+        "JuCo06",
+        "JuPt12",
+        "JuPt16",
+        "JuPt24",
+        "SiCo01",
+        "SiCo10",
+        "SiCo11",
+        "SiCo19",
+        "SiCo26",
+        "SiPt04",
+        "SiPt10",
+        "SiPt17",
+        "SiPt27",
+        "SiPt29",
+        "SiPt32"
+    ],
+    "class_distribution": {
+        "total_test_subjects": 25,
+        "hc_test_subjects": 11,
+        "pd_test_subjects": 14
+    }
+}

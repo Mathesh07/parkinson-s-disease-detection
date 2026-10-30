@@ -1,0 +1,122 @@
+{
+    "model_name": "VoiceBasePaper2DCNN",
+    "dataset": "MDVR-KCL Audio (ReadText & SpontaneousDialogue)",
+    "input_representation": "STFT Log-Magnitude Spectrogram (1, 257, 301)",
+    "subject_level": {
+        "accuracy": 0.8333333333333334,
+        "balanced_accuracy": 0.8333333333333333,
+        "precision": 0.75,
+        "recall_sensitivity": 1.0,
+        "specificity": 0.6666666666666666,
+        "f1_score": 0.8571428571428571,
+        "roc_auc": 1.0,
+        "brier_score": 0.10755528104342482,
+        "negative_log_likelihood": 0.3817175660978748,
+        "tp": 3,
+        "tn": 2,
+        "fp": 1,
+        "fn": 0
+    },
+    "recording_level": {
+        "accuracy": 0.9166666666666666,
+        "balanced_accuracy": 0.9166666666666667,
+        "precision": 0.8571428571428571,
+        "recall_sensitivity": 1.0,
+        "specificity": 0.8333333333333334,
+        "f1_score": 0.9230769230769231,
+        "roc_auc": 0.9722222222222223,
+        "brier_score": 0.11191566851376018,
+        "negative_log_likelihood": 0.3884555587780545,
+        "tp": 6,
+        "tn": 5,
+        "fp": 1,
+        "fn": 0
+    },
+    "chunk_level": {
+        "accuracy": 0.7941429801894918,
+        "balanced_accuracy": 0.7952536042562288,
+        "precision": 0.7598736176935229,
+        "recall_sensitivity": 0.846830985915493,
+        "specificity": 0.7436762225969646,
+        "f1_score": 0.8009991673605329,
+        "roc_auc": 0.8888648077334156,
+        "brier_score": 0.1428203518245234,
+        "negative_log_likelihood": 0.43328918339698735,
+        "tp": 481,
+        "tn": 441,
+        "fp": 152,
+        "fn": 87
+    },
+    "task_breakdown": {
+        "ReadText": {
+            "accuracy": 0.8333333333333334,
+            "balanced_accuracy": 0.8333333333333333,
+            "precision": 0.75,
+            "recall_sensitivity": 1.0,
+            "specificity": 0.6666666666666666,
+            "f1_score": 0.8571428571428571,
+            "roc_auc": 1.0,
+            "brier_score": 0.10996507284432168,
+            "negative_log_likelihood": 0.3727086144799301,
+            "tp": 3,
+            "tn": 2,
+            "fp": 1,
+            "fn": 0
+        },
+        "SpontaneousDialogue": {
+            "accuracy": 1.0,
+            "balanced_accuracy": 1.0,
+            "precision": 1.0,
+            "recall_sensitivity": 1.0,
+            "specificity": 1.0,
+            "f1_score": 1.0,
+            "roc_auc": 1.0,
+            "brier_score": 0.11386626418319866,
+            "negative_log_likelihood": 0.4042025030761791,
+            "tp": 3,
+            "tn": 3,
+            "fp": 0,
+            "fn": 0
+        }
+    },
+    "transition_models": {
+        "onset_model": {
+            "accuracy": 0.5,
+            "balanced_accuracy": 0.5,
+            "precision": 0.0,
+            "recall_sensitivity": 0.0,
+            "specificity": 1.0,
+            "f1_score": 0.0,
+            "roc_auc": 0.6111111111111112,
+            "brier_score": 0.24944009179661122,
+            "negative_log_likelihood": 0.6920267264220422,
+            "tp": 0,
+            "tn": 6,
+            "fp": 0,
+            "fn": 6
+        },
+        "offset_model": {
+            "accuracy": 0.5,
+            "balanced_accuracy": 0.5,
+            "precision": 0.0,
+            "recall_sensitivity": 0.0,
+            "specificity": 1.0,
+            "f1_score": 0.0,
+            "roc_auc": 0.6111111111111112,
+            "brier_score": 0.24862693351171364,
+            "negative_log_likelihood": 0.6904006101156561,
+            "tp": 0,
+            "tn": 6,
+            "fp": 0,
+            "fn": 6
+        }
+    },
+    "test_subjects": [
+        "ID04",
+        "ID10",
+        "ID13",
+        "ID23",
+        "ID29",
+        "ID35"
+    ]
+}

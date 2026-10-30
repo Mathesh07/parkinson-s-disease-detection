@@ -1,0 +1,16 @@
+{
+    "model_type": "GaitBasePaper2DCNN",
+    "in_channels": 16,
+    "conv_channels": [
+        32,
+        64,
+        128
+    ],
+    "dense_units": 128,
+    "dropout_rate": 0.3,
+    "input_shape": [
+        16,
+        33,
+        32
+    ]
+}
