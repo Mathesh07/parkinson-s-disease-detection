@@ -1,7 +1,15 @@
-<html>
-<head><title>404 Not Found</title></head>
-<body>
-<center><h1>404 Not Found</h1></center>
-<hr><center>nginx/1.22.1</center>
-</body>
-</html>
+# PhysioNet Gait in Parkinson's Disease Database Records Convention
+# Dataset: https://physionet.org/content/gaitpdb/1.0.0/
+# Format: [Study][Group][Subject]_[Walk].txt
+# Studies:
+#   Ga: Galit Yogev et al. (Tel-Aviv Sourasky Medical Center)
+#   Ju: Jeffrey Hausdorff et al. (Tel-Aviv Sourasky Medical Center)
+#   Si: Nir Giladi et al. (Tel-Aviv Sourasky Medical Center)
+# Groups:
+#   Co: Control / Healthy (label: 0)
+#   Pt: Patient / Parkinson's Disease (label: 1)
+# Examples:
+#   GaCo01_01.txt ... GaCo01_02.txt
+#   GaPt01_01.txt ... GaPt01_02.txt
+#   JuPt01_01.txt ... JuPt29_01.txt
+#   SiPt01_01.txt ... SiPt40_01.txt

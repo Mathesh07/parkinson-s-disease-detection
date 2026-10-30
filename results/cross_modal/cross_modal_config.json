@@ -1,5 +1,10 @@
 {
-    "experiment": "Cross-Modal Reliability Fusion (Gait + Voice)",
-    "paired_subjects_note": "Gait (PhysioNet Ga/Ju/Si) and Voice (MDVR-KCL) cohorts are distinct. Synthetic pairings are used strictly for demonstrating decision-level fusion logic.",
+    "experiment": "Tri-Modal Reliability Fusion (Gait + Voice + Handwriting)",
+    "modalities": [
+        "Gait",
+        "Voice",
+        "Handwriting"
+    ],
+    "paired_subjects_note": "Gait (PhysioNet Ga/Ju/Si), Voice (MDVR-KCL), and Handwriting (NewHandPD) cohorts are distinct. Synthetic pairings evaluate decision-level tri-modal fusion logic.",
     "scenarios_evaluated": 4
 }
