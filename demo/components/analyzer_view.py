@@ -23,7 +23,9 @@ for p in (str(root_dir), str(demo_dir)):
     if p not in sys.path:
         sys.path.insert(0, p)
 
+import tempfile
 from cross_modal_reliability import CrossModalReliabilityEngine
+from multimodal_pipeline import MultimodalPredictor
 
 
 def load_demo_scenarios() -> Dict[str, Dict]:
@@ -170,28 +172,77 @@ def render_analyzer_view():
             st.image(uploaded_hw, width=150, caption=f"Drawing: {uploaded_hw.name}")
             st.success(f"Drawing: `{uploaded_hw.name}`")
 
-    # Pre-set Demo Scenarios
-    scenarios = load_demo_scenarios()
-    selected_scenario_key = st.selectbox(
-        "🎯 Select Pre-set Demonstration Scenario (Saved Research Outputs):",
-        options=list(scenarios.keys()),
-        index=0
-    )
-    
-    current_scenario = scenarios[selected_scenario_key]
-    st.info(f"**{current_scenario['title']}** — {current_scenario['desc']}\n\n*Note: Demonstration scenarios use frozen research outputs across all 3 modalities to guarantee presentation stability.*")
+    # Mode Selection: Live Uploads vs Pre-set Scenarios
+    has_uploaded = uploaded_gait is not None or uploaded_voice is not None or uploaded_hw is not None
+    mode = "Pre-set Research Scenarios"
+    if has_uploaded:
+        mode = st.radio(
+            "⚡ Select Analysis Source:",
+            options=["🎯 Pre-set Research Scenarios", "🚀 Live Patient File Uploads (Active)"],
+            horizontal=True
+        )
 
-    gait_data = current_scenario["gait"]
-    voice_data = current_scenario["voice"]
-    hw_data = current_scenario["handwriting"]
+    predictor = MultimodalPredictor()
 
-    # 2. RUN TRI-MODAL CROSS-MODAL FUSION ENGINE
-    engine = CrossModalReliabilityEngine()
-    fusion_result = engine.fuse_modalities(
-        gait_output=gait_data,
-        voice_output=voice_data,
-        handwriting_output=hw_data
-    )
+    if has_uploaded and "Live" in mode:
+        st.success("🔬 **Processing live multimodal patient inputs via MultimodalPredictor pipeline...**")
+        
+        # Save temp files for uploaded modalities
+        gait_temp = None
+        if uploaded_gait:
+            with tempfile.NamedTemporaryFile(delete=False, suffix=f"_{uploaded_gait.name}") as f:
+                f.write(uploaded_gait.getbuffer())
+                gait_temp = f.name
+        
+        voice_temp = None
+        if uploaded_voice:
+            with tempfile.NamedTemporaryFile(delete=False, suffix=f"_{uploaded_voice.name}") as f:
+                f.write(uploaded_voice.getbuffer())
+                voice_temp = f.name
+
+        hw_temp = None
+        if uploaded_hw:
+            with tempfile.NamedTemporaryFile(delete=False, suffix=f"_{uploaded_hw.name}") as f:
+                f.write(uploaded_hw.getbuffer())
+                hw_temp = f.name
+
+        try:
+            gait_data = predictor.process_gait(gait_temp) if gait_temp else None
+            voice_data = predictor.process_voice(voice_temp) if voice_temp else None
+            hw_data = predictor.process_handwriting(hw_temp) if hw_temp else None
+            
+            fusion_result = predictor.predict(gait=gait_data, voice=voice_data, handwriting=hw_data)
+        finally:
+            # Cleanup temp files
+            for temp_p in (gait_temp, voice_temp, hw_temp):
+                if temp_p and os.path.exists(temp_p):
+                    try:
+                        os.remove(temp_p)
+                    except Exception:
+                        pass
+    else:
+        # Pre-set Demo Scenarios
+        scenarios = load_demo_scenarios()
+        selected_scenario_key = st.selectbox(
+            "🎯 Select Pre-set Demonstration Scenario (Saved Research Outputs):",
+            options=list(scenarios.keys()),
+            index=0
+        )
+        
+        current_scenario = scenarios[selected_scenario_key]
+        st.info(f"**{current_scenario['title']}** — {current_scenario['desc']}\n\n*Note: Demonstration scenarios use frozen research outputs across all 3 modalities to guarantee presentation stability.*")
+
+        gait_data = current_scenario["gait"]
+        voice_data = current_scenario["voice"]
+        hw_data = current_scenario["handwriting"]
+
+        # RUN TRI-MODAL CROSS-MODAL FUSION ENGINE
+        engine = CrossModalReliabilityEngine()
+        fusion_result = engine.fuse_modalities(
+            gait_output=gait_data,
+            voice_output=voice_data,
+            handwriting_output=hw_data
+        )
 
     st.markdown("---")
 
@@ -202,55 +253,64 @@ def render_analyzer_view():
     with col_gait:
         st.markdown("<div style='background-color: #161b22; padding: 1.25rem; border-radius: 8px; border: 1px solid #30363d;'>", unsafe_allow_html=True)
         st.markdown("<h4 style='color: #58a6ff; margin-top:0;'>🏃 GAIT MODALITY</h4>", unsafe_allow_html=True)
-        st.write(f"**Model:** `1D-CNN + BiLSTM (M=5)`")
-        st.write(f"**Prediction:** {gait_data['prediction']}")
-        st.write(f"**P(PD):** `{gait_data['p_pd']*100:.1f}%` | **P(HC):** `{gait_data['p_healthy']*100:.1f}%`")
-        st.write(f"**Ensemble Agreement:** `{gait_data.get('ensemble_agreement', '5/5')}`")
-        st.write(f"**Uncertainty Score:** `{gait_data['uncertainty']:.3f}`")
-        
-        c_set_str = "{" + ", ".join(gait_data['conformal_prediction_set']) + "}" if gait_data['conformal_prediction_set'] else "{}"
-        st.write(f"**Conformal Set:** `{c_set_str}`")
+        if gait_data is not None:
+            st.write(f"**Model:** `1D-CNN + BiLSTM (M=5)`")
+            st.write(f"**Prediction:** {gait_data['prediction']}")
+            st.write(f"**P(PD):** `{gait_data['p_pd']*100:.1f}%` | **P(HC):** `{gait_data['p_healthy']*100:.1f}%`")
+            st.write(f"**Ensemble Agreement:** `{gait_data.get('ensemble_agreement', '5/5')}`")
+            st.write(f"**Uncertainty Score:** `{gait_data['uncertainty']:.3f}`")
+            
+            c_set_str = "{" + ", ".join(gait_data['conformal_prediction_set']) + "}" if gait_data['conformal_prediction_set'] else "{}"
+            st.write(f"**Conformal Set:** `{c_set_str}`")
 
-        rel_status = gait_data['reliability']
-        rel_color = "#2ea043" if rel_status == "ACCEPT" else "#da3633"
-        st.markdown(f"**Reliability:** <span style='color: {rel_color}; font-weight: bold;'>[{rel_status}] ({gait_data['reliability_level']})</span>", unsafe_allow_html=True)
-        st.write(f"**Reason:** `{', '.join(gait_data['reliability_reasons'])}`")
+            rel_status = gait_data['reliability']
+            rel_color = "#2ea043" if rel_status == "ACCEPT" else "#da3633"
+            st.markdown(f"**Reliability:** <span style='color: {rel_color}; font-weight: bold;'>[{rel_status}] ({gait_data['reliability_level']})</span>", unsafe_allow_html=True)
+            st.write(f"**Reason:** `{', '.join(gait_data['reliability_reasons'])}`")
+        else:
+            st.info("ℹ️ Modality not uploaded. Skipped from cross-modal synthesis.")
         st.markdown("</div>", unsafe_allow_html=True)
 
     with col_voice:
         st.markdown("<div style='background-color: #161b22; padding: 1.25rem; border-radius: 8px; border: 1px solid #30363d;'>", unsafe_allow_html=True)
         st.markdown("<h4 style='color: #d2a8ff; margin-top:0;'>🎙️ VOICE MODALITY</h4>", unsafe_allow_html=True)
-        st.write(f"**Model:** `Wav2Vec2 Ensemble (M=5)`")
-        st.write(f"**Prediction:** {voice_data['prediction']}")
-        st.write(f"**P(PD):** `{voice_data['p_pd']*100:.1f}%` | **P(HC):** `{voice_data['p_healthy']*100:.1f}%`")
-        st.write(f"**Ensemble Agreement:** `{voice_data.get('ensemble_agreement', '5/5')}`")
-        st.write(f"**Predictive Entropy:** `{voice_data['uncertainty']:.3f}`")
-        
-        v_c_set_str = "{" + ", ".join(voice_data['conformal_prediction_set']) + "}" if voice_data['conformal_prediction_set'] else "{}"
-        st.write(f"**Conformal Set:** `{v_c_set_str}`")
+        if voice_data is not None:
+            st.write(f"**Model:** `Wav2Vec2 Ensemble (M=5)`")
+            st.write(f"**Prediction:** {voice_data['prediction']}")
+            st.write(f"**P(PD):** `{voice_data['p_pd']*100:.1f}%` | **P(HC):** `{voice_data['p_healthy']*100:.1f}%`")
+            st.write(f"**Ensemble Agreement:** `{voice_data.get('ensemble_agreement', '5/5')}`")
+            st.write(f"**Predictive Entropy:** `{voice_data['uncertainty']:.3f}`")
+            
+            v_c_set_str = "{" + ", ".join(voice_data['conformal_prediction_set']) + "}" if voice_data['conformal_prediction_set'] else "{}"
+            st.write(f"**Conformal Set:** `{v_c_set_str}`")
 
-        v_rel_status = voice_data['reliability']
-        v_rel_color = "#2ea043" if v_rel_status == "ACCEPT" else "#da3633"
-        st.markdown(f"**Reliability:** <span style='color: {v_rel_color}; font-weight: bold;'>[{v_rel_status}] ({voice_data['reliability_level']})</span>", unsafe_allow_html=True)
-        st.write(f"**Reason:** `{', '.join(voice_data['reliability_reasons'])}`")
+            v_rel_status = voice_data['reliability']
+            v_rel_color = "#2ea043" if v_rel_status == "ACCEPT" else "#da3633"
+            st.markdown(f"**Reliability:** <span style='color: {v_rel_color}; font-weight: bold;'>[{v_rel_status}] ({voice_data['reliability_level']})</span>", unsafe_allow_html=True)
+            st.write(f"**Reason:** `{', '.join(voice_data['reliability_reasons'])}`")
+        else:
+            st.info("ℹ️ Modality not uploaded. Skipped from cross-modal synthesis.")
         st.markdown("</div>", unsafe_allow_html=True)
 
     with col_hw:
         st.markdown("<div style='background-color: #161b22; padding: 1.25rem; border-radius: 8px; border: 1px solid #30363d;'>", unsafe_allow_html=True)
         st.markdown("<h4 style='color: #7ee787; margin-top:0;'>✍️ HANDWRITING MODALITY</h4>", unsafe_allow_html=True)
-        st.write(f"**Model:** `Vision Transformer (ViT EDL)`")
-        st.write(f"**Prediction:** {hw_data['prediction']}")
-        st.write(f"**P(PD):** `{hw_data['p_pd']*100:.1f}%` | **P(HC):** `{hw_data['p_healthy']*100:.1f}%`")
-        st.write(f"**Evidence Head:** `{hw_data.get('evidence', 'N/A')}`")
-        st.write(f"**Dirichlet Vacuity:** `{hw_data['uncertainty']:.3f}`")
-        
-        hw_c_set_str = "{" + ", ".join(hw_data['conformal_prediction_set']) + "}" if hw_data['conformal_prediction_set'] else "{}"
-        st.write(f"**Conformal Set:** `{hw_c_set_str}`")
+        if hw_data is not None:
+            st.write(f"**Model:** `Vision Transformer (ViT EDL)`")
+            st.write(f"**Prediction:** {hw_data['prediction']}")
+            st.write(f"**P(PD):** `{hw_data['p_pd']*100:.1f}%` | **P(HC):** `{hw_data['p_healthy']*100:.1f}%`")
+            st.write(f"**Evidence Head:** `{hw_data.get('evidence', 'N/A')}`")
+            st.write(f"**Dirichlet Vacuity:** `{hw_data['uncertainty']:.3f}`")
+            
+            hw_c_set_str = "{" + ", ".join(hw_data['conformal_prediction_set']) + "}" if hw_data['conformal_prediction_set'] else "{}"
+            st.write(f"**Conformal Set:** `{hw_c_set_str}`")
 
-        hw_rel_status = hw_data['reliability']
-        hw_rel_color = "#2ea043" if hw_rel_status == "ACCEPT" else "#da3633"
-        st.markdown(f"**Reliability:** <span style='color: {hw_rel_color}; font-weight: bold;'>[{hw_rel_status}] ({hw_data['reliability_level']})</span>", unsafe_allow_html=True)
-        st.write(f"**Reason:** `{', '.join(hw_data['reliability_reasons'])}`")
+            hw_rel_status = hw_data['reliability']
+            hw_rel_color = "#2ea043" if hw_rel_status == "ACCEPT" else "#da3633"
+            st.markdown(f"**Reliability:** <span style='color: {hw_rel_color}; font-weight: bold;'>[{hw_rel_status}] ({hw_data['reliability_level']})</span>", unsafe_allow_html=True)
+            st.write(f"**Reason:** `{', '.join(hw_data['reliability_reasons'])}`")
+        else:
+            st.info("ℹ️ Modality not uploaded. Skipped from cross-modal synthesis.")
         st.markdown("</div>", unsafe_allow_html=True)
 
     st.markdown("---")
