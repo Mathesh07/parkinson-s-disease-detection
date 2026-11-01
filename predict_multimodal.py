@@ -5,6 +5,13 @@ import json
 import sys
 from pathlib import Path
 
+# Ensure UTF-8 output on Windows consoles
+if hasattr(sys.stdout, "reconfigure"):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
+
 # Add project root to path
 root_dir = Path(__file__).resolve().parent
 if str(root_dir) not in sys.path:
@@ -21,6 +28,8 @@ def main():
     parser.add_argument("--voice", type=str, default=None, help="Path to voice audio recording (.wav)")
     parser.add_argument("--handwriting", type=str, default=None, help="Path to handwriting drawing image (.png / .jpg)")
     parser.add_argument("--json", action="store_true", help="Print raw JSON decision structure")
+    parser.add_argument("--explain", action="store_true", help="Generate and export multimodal explainability dashboards")
+    parser.add_argument("--explain-dir", type=str, default="results/explanations", help="Directory to save explainability plots")
 
     args = parser.parse_args()
 
@@ -33,6 +42,18 @@ def main():
         voice=args.voice,
         handwriting=args.handwriting
     )
+
+    if args.explain:
+        explanations = predictor.explain(
+            gait=args.gait,
+            voice=args.voice,
+            handwriting=args.handwriting,
+            output_dir=args.explain_dir
+        )
+        result["explanations"] = {
+            mod: {"save_path": exp.get("save_path"), "metrics": exp}
+            for mod, exp in explanations.items()
+        }
 
     if args.json:
         print(json.dumps(result, indent=2))
@@ -51,6 +72,11 @@ def main():
     print(f" System Decision:     [{rel_color}] (Level: {result['final_reliability_level']})")
     print(f" Actionable Guidance: {result['clinical_action']}")
     print(f" Clinical Summary:    {result['clinical_summary']}")
+    if args.explain and "explanations" in result:
+        print("-" * 70)
+        print(" 🔍 EXPLAINABILITY & CLINICAL ATTRIBUTION DASHBOARDS:")
+        for mod, exp_info in result["explanations"].items():
+            print(f"   • {mod.capitalize()} Dashboard: {exp_info['save_path']}")
     print("=" * 70 + "\n")
 
 

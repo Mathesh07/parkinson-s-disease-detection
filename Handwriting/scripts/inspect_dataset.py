@@ -1,6 +1,10 @@
 import os, pandas as pd, glob
 from collections import Counter
-root = r'd:\Materials\SEM7\Project Work 1\Implementation\Handwriting\NewHandPD'
+from pathlib import Path
+
+# Resolve dataset directory from current project repository
+root = Path(__file__).resolve().parent.parent / "NewHandPD"
+
 for csv_name in ['NewSpiral.csv','NewMeander.csv']:
     path = os.path.join(root,csv_name)
     print(f'=== {csv_name} ===')

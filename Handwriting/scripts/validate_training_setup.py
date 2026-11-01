@@ -1,5 +1,8 @@
 import sys
-sys.path.append(r'd:\Materials\SEM7\Project Work 1\Implementation\Handwriting')
+from pathlib import Path
+hw_dir = Path(__file__).resolve().parent.parent
+if str(hw_dir) not in sys.path:
+    sys.path.insert(0, str(hw_dir))
 
 from dataset import build_manifest, create_patient_level_split, create_dataloaders
 from model import ViTBinaryClassifier

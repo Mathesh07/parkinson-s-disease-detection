@@ -73,10 +73,11 @@ def render_evidence_view():
     # 2. KEY RESEARCH DASHBOARDS
     st.markdown("### 📈 Key High-Value Research Dashboards")
 
-    tab1, tab2, tab3 = st.tabs([
+    tab1, tab2, tab3, tab4 = st.tabs([
         "🔀 Cross-Modal Fusion Dashboard",
         "🎙️ Voice Reliability Dashboard",
-        "🔊 Acoustic Corruption Dashboard"
+        "🔊 Acoustic Corruption Dashboard",
+        "🧠 Tri-Modal Explainability Dashboards"
     ])
 
     with tab1:
@@ -99,3 +100,42 @@ def render_evidence_view():
             st.image(str(dash_fig3), caption="Voice Acoustic Corruption vs. Predictive Uncertainty Dashboard", use_container_width=True)
         else:
             st.info("Acoustic corruption dashboard figure available in Voice/results/acoustic_corruption/.")
+
+    with tab4:
+        st.markdown("#### 🔬 Modality-Specific Feature Attribution & Explainability")
+        st.markdown(
+            "Every modality incorporates mathematical feature attributions grounding clinical predictions:\n"
+            "- **Gait:** Integrated Gradients & 1D Grad-CAM (Bilateral Asymmetry & Stance Phases)\n"
+            "- **Voice:** 2D Grad-CAM Spectrogram Saliency & Acoustic Band Decomposition (F0 Pitch vs Formants)\n"
+            "- **Handwriting:** Vision Transformer (ViT) Attention Rollout & CNN 2D Grad-CAM"
+        )
+
+        sub_tab_gait, sub_tab_voice, sub_tab_hw = st.tabs(["🏃 Gait Attribution", "🎙️ Voice Saliency", "✍️ Handwriting Attention"])
+
+        with sub_tab_gait:
+            gait_exp = root_dir / "Gait" / "outputs" / "plots" / "test_gait_explainability.png"
+            if not gait_exp.exists():
+                gait_exp = root_dir / "results" / "explanations" / "Patient_Sample_gait_explainability.png"
+            if gait_exp.exists():
+                st.image(str(gait_exp), caption="Gait Modality Explainability: 1D Grad-CAM Temporal Saliency & Integrated Gradients Bilateral Asymmetry", use_container_width=True)
+            else:
+                st.info("Gait explainability plot not yet generated.")
+
+        with sub_tab_voice:
+            voice_exp = root_dir / "Voice" / "results" / "voice_explainability.png"
+            if not voice_exp.exists():
+                voice_exp = root_dir / "results" / "explanations" / "Patient_Sample_voice_explainability.png"
+            if voice_exp.exists():
+                st.image(str(voice_exp), caption="Voice Modality Explainability: 2D Grad-CAM Log-Mel Saliency & Marginal Frequency Band Breakdown", use_container_width=True)
+            else:
+                st.info("Voice explainability plot not yet generated.")
+
+        with sub_tab_hw:
+            hw_exp = root_dir / "Handwriting" / "outputs" / "vit_explainability.png"
+            if not hw_exp.exists():
+                hw_exp = root_dir / "results" / "explanations" / "Patient_Sample_hw_explainability.png"
+            if hw_exp.exists():
+                st.image(str(hw_exp), caption="Handwriting Modality Explainability: Vision Transformer (ViT) Attention Rollout Heatmaps", use_container_width=True)
+            else:
+                st.info("Handwriting explainability plot not yet generated.")
+

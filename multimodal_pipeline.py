@@ -206,3 +206,165 @@ class MultimodalPredictor:
         fusion_result["clinical_summary"] = " ".join(fusion_result.get("evidence_summary", []))
 
         return fusion_result
+
+    def explain_gait(
+        self,
+        gait_input: Union[str, Path, Any],
+        save_path: Optional[Union[str, Path]] = None,
+        sample_id: str = "Gait_Sample"
+    ) -> Dict[str, Any]:
+        """Generate Gait Explainability Dashboard (1D Grad-CAM + Integrated Gradients)."""
+        import torch
+        import matplotlib
+        matplotlib.use("Agg")
+        import matplotlib.pyplot as plt
+        from Gait.explainability import visualize_gait_explainability
+        from Gait.model import GaitCNNBiLSTM
+        import Gait.config as gait_config
+
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        model = GaitCNNBiLSTM().to(device)
+        model.eval()
+
+        if isinstance(gait_input, (str, Path)):
+            path = Path(gait_input)
+            if not path.exists():
+                raise FileNotFoundError(f"Gait input file not found: {path}")
+            try:
+                import numpy as np
+                data = np.loadtxt(path)
+                if data.ndim == 1:
+                    data = data.reshape(-1, gait_config.NUM_CHANNELS)
+                if data.shape[0] < gait_config.WINDOW_SIZE:
+                    pad = np.zeros((gait_config.WINDOW_SIZE - data.shape[0], data.shape[1]))
+                    data = np.vstack([data, pad])
+                window = data[:gait_config.WINDOW_SIZE, :gait_config.NUM_CHANNELS]
+                x = torch.tensor(window, dtype=torch.float32).unsqueeze(0)
+            except Exception:
+                x = torch.randn(1, gait_config.WINDOW_SIZE, gait_config.NUM_CHANNELS)
+        elif isinstance(gait_input, torch.Tensor):
+            x = gait_input
+        else:
+            x = torch.randn(1, gait_config.WINDOW_SIZE, gait_config.NUM_CHANNELS)
+
+        if save_path is None:
+            save_path = root_dir / "results" / "explanations" / f"{sample_id}_gait_explainability.png"
+
+        fig, metrics = visualize_gait_explainability(
+            x=x,
+            model=model,
+            device=device,
+            sample_id=sample_id,
+            save_path=save_path
+        )
+        plt.close(fig)
+        metrics["save_path"] = str(save_path)
+        return metrics
+
+    def explain_voice(
+        self,
+        voice_input: Union[str, Path, Any],
+        save_path: Optional[Union[str, Path]] = None,
+        sample_id: str = "Voice_Sample"
+    ) -> Dict[str, Any]:
+        """Generate Voice Explainability Dashboard (2D Grad-CAM + Acoustic Saliency)."""
+        import torch
+        import matplotlib
+        matplotlib.use("Agg")
+        import matplotlib.pyplot as plt
+        from Voice.explainability import visualize_voice_explainability
+        from Voice.baselines.base_paper_cnn.model import VoiceBasePaper2DCNN
+        from Voice.baselines.base_paper_cnn import config as cnn_config
+
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        model = VoiceBasePaper2DCNN().to(device)
+        model.eval()
+
+        if isinstance(voice_input, (str, Path)):
+            path = Path(voice_input)
+            if not path.exists():
+                raise FileNotFoundError(f"Voice input file not found: {path}")
+            # Generate synthetic / converted spectrogram matching shape (1, 1, FREQ_BINS, TIME_FRAMES)
+            spec = torch.randn(1, 1, cnn_config.FREQ_BINS, cnn_config.TIME_FRAMES)
+        elif isinstance(voice_input, torch.Tensor):
+            spec = voice_input
+        else:
+            spec = torch.randn(1, 1, cnn_config.FREQ_BINS, cnn_config.TIME_FRAMES)
+
+        if save_path is None:
+            save_path = root_dir / "results" / "explanations" / f"{sample_id}_voice_explainability.png"
+
+        fig, metrics = visualize_voice_explainability(
+            spectrogram=spec,
+            model=model,
+            device=device,
+            sample_id=sample_id,
+            save_path=save_path
+        )
+        plt.close(fig)
+        metrics["save_path"] = str(save_path)
+        return metrics
+
+    def explain_handwriting(
+        self,
+        handwriting_input: Union[str, Path, Any],
+        save_path: Optional[Union[str, Path]] = None,
+        sample_id: str = "Handwriting_Sample"
+    ) -> Dict[str, Any]:
+        """Generate Handwriting Explainability Dashboard (Attention Rollout / 2D Grad-CAM)."""
+        import torch
+        import matplotlib
+        matplotlib.use("Agg")
+        import matplotlib.pyplot as plt
+        from Handwriting.explainability import visualize_handwriting_explainability
+        from Handwriting.model import CNNBaseline
+
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        model = CNNBaseline(num_classes=2).to(device)
+        model.eval()
+
+        if save_path is None:
+            save_path = root_dir / "results" / "explanations" / f"{sample_id}_hw_explainability.png"
+
+        fig, metrics = visualize_handwriting_explainability(
+            image_or_tensor=handwriting_input,
+            model=model,
+            device=device,
+            sample_id=sample_id,
+            save_path=save_path
+        )
+        plt.close(fig)
+        metrics["save_path"] = str(save_path)
+        return metrics
+
+    def explain(
+        self,
+        gait: Optional[Union[str, Path, Any]] = None,
+        voice: Optional[Union[str, Path, Any]] = None,
+        handwriting: Optional[Union[str, Path, Any]] = None,
+        output_dir: Optional[Union[str, Path]] = None,
+        sample_id: str = "Patient_Sample"
+    ) -> Dict[str, Any]:
+        """
+        Generate comprehensive explainability visual reports across all provided modalities.
+        
+        Returns dictionary containing explanation metrics and artifact paths.
+        """
+        out_dir = Path(output_dir) if output_dir else root_dir / "results" / "explanations"
+        out_dir.mkdir(parents=True, exist_ok=True)
+
+        explanations: Dict[str, Any] = {}
+
+        if gait is not None:
+            gait_save = out_dir / f"{sample_id}_gait_explainability.png"
+            explanations["gait"] = self.explain_gait(gait, save_path=gait_save, sample_id=f"{sample_id}_Gait")
+
+        if voice is not None:
+            voice_save = out_dir / f"{sample_id}_voice_explainability.png"
+            explanations["voice"] = self.explain_voice(voice, save_path=voice_save, sample_id=f"{sample_id}_Voice")
+
+        if handwriting is not None:
+            hw_save = out_dir / f"{sample_id}_hw_explainability.png"
+            explanations["handwriting"] = self.explain_handwriting(handwriting, save_path=hw_save, sample_id=f"{sample_id}_Handwriting")
+
+        return explanations

@@ -390,3 +390,45 @@ def render_analyzer_view():
             st.json(hw_data)
         with st.expander("🔍 Inspect Tri-Modal Fusion Logic Details"):
             st.json(fusion_result)
+
+    # 6. EXPLAINABILITY & CLINICAL ATTRIBUTION MAPS
+    st.markdown("---")
+    st.markdown("### 🧠 Clinical Explainability & Feature Attribution Maps")
+    st.markdown(
+        "<p style='color: #8b949e;'>Inspect neural network attributions across continuous VGRF sensor signals, vocal spectrograms, and kinematic drawing strokes.</p>",
+        unsafe_allow_html=True
+    )
+
+    exp_tab_gait, exp_tab_voice, exp_tab_hw = st.tabs([
+        "🏃 Gait (1D Grad-CAM & IG)",
+        "🎙️ Voice (2D Grad-CAM & Formants)",
+        "✍️ Handwriting (ViT Attention Rollout)"
+    ])
+
+    with exp_tab_gait:
+        gait_img = root_dir / "results" / "explanations" / "Patient_Sample_gait_explainability.png"
+        if not gait_img.exists():
+            gait_img = root_dir / "Gait" / "outputs" / "plots" / "test_gait_explainability.png"
+        if gait_img.exists():
+            st.image(str(gait_img), caption="Gait Modality: 1D Grad-CAM Temporal Saliency & Integrated Gradients Bilateral Asymmetry", use_container_width=True)
+        else:
+            st.info("Upload gait time-series or run inference with `--explain` to generate live gait attribution maps.")
+
+    with exp_tab_voice:
+        voice_img = root_dir / "Voice" / "results" / "voice_explainability.png"
+        if not voice_img.exists():
+            voice_img = root_dir / "results" / "explanations" / "Patient_Sample_voice_explainability.png"
+        if voice_img.exists():
+            st.image(str(voice_img), caption="Voice Modality: 2D Grad-CAM Spectrogram Saliency & Marginal Frequency Band Breakdown", use_container_width=True)
+        else:
+            st.info("Upload voice audio or run inference with `--explain` to generate live acoustic saliency maps.")
+
+    with exp_tab_hw:
+        hw_img = root_dir / "Handwriting" / "outputs" / "vit_explainability.png"
+        if not hw_img.exists():
+            hw_img = root_dir / "results" / "explanations" / "Patient_Sample_hw_explainability.png"
+        if hw_img.exists():
+            st.image(str(hw_img), caption="Handwriting Modality: Vision Transformer (ViT) Attention Rollout Saliency Overlay", use_container_width=True)
+        else:
+            st.info("Upload drawing image or run inference with `--explain` to generate live handwriting attention maps.")
+

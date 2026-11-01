@@ -96,3 +96,30 @@ def test_multimodal_empty_input_raises_error():
     predictor = MultimodalPredictor()
     with pytest.raises(ValueError):
         predictor.predict()
+
+
+def test_multimodal_explainability(tmp_path):
+    """Verify MultimodalPredictor.explain generates valid explainability artifacts."""
+    import torch
+    predictor = MultimodalPredictor()
+
+    dummy_gait = torch.randn(1, 500, 16)
+    dummy_voice = torch.randn(1, 1, 257, 301)
+    dummy_hw = torch.randn(1, 3, 224, 224)
+
+    out_dir = tmp_path / "explanations"
+    explanations = predictor.explain(
+        gait=dummy_gait,
+        voice=dummy_voice,
+        handwriting=dummy_hw,
+        output_dir=out_dir,
+        sample_id="TestMultiPatient"
+    )
+
+    assert "gait" in explanations
+    assert "voice" in explanations
+    assert "handwriting" in explanations
+    assert Path(explanations["gait"]["save_path"]).exists()
+    assert Path(explanations["voice"]["save_path"]).exists()
+    assert Path(explanations["handwriting"]["save_path"]).exists()
+
